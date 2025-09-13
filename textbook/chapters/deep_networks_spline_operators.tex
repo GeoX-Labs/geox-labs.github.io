@@ -1,0 +1,161 @@
+\section{Introduction}
+
+Both deep networks and spline operators can be viewed as functional approximation methods. As we will show in this chapter, a large class of deep networks are equivalent to spline operators. Consequently, we can translate questions regarding deep networks into the language of spline theory, opening an array of research avenues, for which it will be the purpose of this book to explore. In this chapter we first recognise how certain deep network operators can be represented as max affine spline operators which we then utilise to demonstrate that layers--which are compositions of operators-- are continuous affine spline operators. We then explore how these layers can be combined to represent common deep network architectures such as convolutional neural networks, residual neural networks and recurrent neural networks.
+
+\section{Deep Network Operators as Spline Operators}\label{sec:dno_as_so}
+
+\begin{proposition}\label{prop:fc_maso}
+    A fully connected operator $f_{\text{fc}}^{(\ell)}$ is a degenerate max-affine spline operator $S\left[A_{\text{fc}}^{(\ell)},B_{\text{fc}}^{(\ell)}\right]$ with $r=1$, $\left[A_{\text{fc}}^{(\ell)}\right]_{j,1,\cdot}=\left[W_{\text{fc}}^{(\ell)}\right]_{j,\cdot}$ and $\left[B_{\text{fc}}^{(\ell)}\right]_{j,1}=\left[b_{\text{fc}}^{(\ell)}\right]_j$ for $j=1,\dots,d^{(\ell)}$.
+\end{proposition}
+
+\begin{tproof}
+    With $A^{(\ell)}_{\text{fc}}$ and $B^{(\ell)}_{\text{fc}}$ as given in Proposition \ref{prop:fc_maso}, it is clear that 
+    \begin{align*}
+        f^{(\ell)}_{\text{fc}}(\mathbf{x})&=W_{\text{fc}}^{(\ell)}\mathbf{x}+b^{(\ell)}_{\text{fc}}\\&=\begin{pmatrix}\left\langle\left[W^{(\ell)}_{\text{fc}}\right]_{1,\cdot},\mathbf{x}\right\rangle+\left[b^{(\ell)}_{\text{fc}}\right]_1\\\vdots\\\left\langle\left[W^{(\ell)}_{\text{fc}}\right]_{d^{(\ell)},\cdot},\mathbf{x}\right\rangle+\left[b^{(\ell)}_{\text{fc}}\right]_{d^{(\ell)}}\end{pmatrix}\\&=\begin{pmatrix}\max_{j=1}\left(\left\langle\left[A^{(\ell)}_{\text{fc}}\right]_{1,j,\cdot},\mathbf{x}\right\rangle+\left[B^{(\ell)}_{\text{fc}}\right]_{1,j}\right)\\\vdots\\\max_{j=1}\left(\left\langle\left[A^{(\ell)}_{\text{fc}}\right]_{d^{(\ell)},j,\cdot},\mathbf{x}\right\rangle+\left[B^{(\ell)}_{\text{fc}}\right]_{d^{(\ell)},j}\right)\end{pmatrix}\\&=S\left[A^{(\ell)}_{\text{fc}},B^{(\ell)}_{\text{fc}}\right](\mathbf{x}).
+    \end{align*}
+\end{tproof}
+
+\begin{remark}
+    Proposition \ref{prop:fc_maso} also applies to convolution operators by respectively replacing $W_{\text{fc}}^{(\ell)}, b_{\text{fc}}^{(\ell)}$ with $\mathbf{C}_{\text{conv}}^{(\ell)}, b_{\text{conv}}^{(\ell)}$.
+\end{remark}
+
+\begin{proposition}
+    An activation operator $f_{\sigma}^{(\ell)}$, where $\sigma$ is piecewise affine and convex, is a max-affine spline operator $S\left[A_{\sigma}^{(\ell)},B_{\sigma}^{(\ell)}\right]$ with $r=2$, $\left[B_{\sigma}^{(\ell)}\right]_{j,1}=\left[B_{\sigma}^{(\ell)}\right]_{j,2}=0$ for every $j$ and $A_{\sigma}^{(\ell)}$ being dependent on $\sigma$.
+\end{proposition}
+
+\begin{tproof}
+    We consider the case $\sigma=\sigma_{\text{ReLU}}$, with the understanding that the other cases follow analogously. It follows that
+    \begin{align*}
+        \sigma_{\text{ReLU}}(\mathbf{x})&=\begin{pmatrix}\sigma_{\text{ReLU}}\left(\left[\mathbf{x}\right]_1\right)\\\vdots\\\sigma_{\text{ReLU}}\left(\left[\mathbf{x}\right]_{d^{(\ell)}}\right)\end{pmatrix}\\&=\begin{pmatrix}\max\left(0,\left[\mathbf{x}\right]_1\right)\\\vdots\\\max\left(0,\left[\mathbf{x}\right]_{d^{(\ell)}}\right)\end{pmatrix}\\&=\begin{pmatrix}\max\left(0,\left\langle\mathbf{e}_1,\mathbf{x}\right\rangle\right)\\\vdots\\\max\left(0,\left\langle\mathbf{e}_{d^{(\ell)}},\mathbf{x}\right\rangle\right)\end{pmatrix}.
+    \end{align*}
+    Therefore, $\sigma_{\text{ReLU}}(\mathbf{x})=S\left[A^{(\ell)}_{\sigma},\mathbf{0}\right](\mathbf{x})$ where $$\begin{cases}\left[A_{\sigma}^{(\ell)}\right]_{j,1,\cdot}=\mathbf{0}\\\left[A_{\sigma}^{(\ell)}\right]_{j,2,\cdot}=\mathbf{e}_j\end{cases}$$for $j=1,\dots,d^{(\ell)}$.
+\end{tproof}
+
+\begin{example}\label{eg:maso_activation_operators}
+    \begin{enumerate}
+        \item[]
+        \item For ReLU we have $$\begin{cases}\left[A_{\sigma}^{(\ell)}\right]_{j,1,\cdot}=\mathbf{0}\\\left[A_{\sigma}^{(\ell)}\right]_{j,2,\cdot}=\mathbf{e}_j\end{cases}$$for $j=1,\dots,d^{(\ell)}$.
+        \item For leaky ReLU we have $$\begin{cases}\left[A_{\sigma}^{(\ell)}\right]_{j,1,\cdot}=\eta\mathbf{e}_j\\\left[A_{\sigma}^{(\ell)}\right]_{j,2,\cdot}=\mathbf{e}_j\end{cases}$$for $j=1,\dots,d^{(\ell)}$.
+        \item For the absolute value we have $$\begin{cases}\left[A_{\sigma}^{(\ell)}\right]_{j,1,\cdot}=-\mathbf{e}_j\\\left[A_{\sigma}^{(\ell)}\right]_{j,2,\cdot}=\mathbf{e}_j\end{cases}$$for $j=1,\dots,d^{(\ell)}$.
+    \end{enumerate}
+\end{example}
+
+\begin{proposition}
+    A pooling operator $f_{\rho}^{(\ell)}$ that is piecewise affine and convex is a max-affine spline operator $S\left[A_{\rho}^{(\ell)},B_{\rho}^{(\ell)}\right]$.
+\end{proposition}
+
+\begin{tproof}
+    We consider the case $\rho=\rho_{\max}$, with the understanding that the other cases follow analogously. It follows that
+    \begin{align*}
+        f^{(\ell)}_{\rho_{\max}}(\mathbf{x})&=\begin{pmatrix}\max_{t\in\mathcal{R}^{(\ell)}_1}\left([\mathbf{x}]_t\right)\\\vdots\\\max_{t\in\mathcal{R}^{(\ell)}_{d^{(\ell)}}}\left([\mathbf{x}]_t\right)\end{pmatrix}\\&=\begin{pmatrix}\max_{t\in\mathcal{R}^{(\ell)}_1}\left(\left\langle\mathbf{e}_t,\mathbf{x}\right\rangle\right)\\\vdots\\\max_{t\in\mathcal{R}^{(\ell)}_{d^{(\ell)}}}\left(\left\langle\mathbf{e}_t,\mathbf{x}\right\rangle\right)\end{pmatrix}.
+    \end{align*}
+    Therefore, $f^{(\ell)}_{\rho_{\max}}(\mathbf{x})=S\left[A_{\rho_{\max}},B^{(\ell)}_{\rho_{\max}}\right](\mathbf{x})$ where $$\begin{cases}\left[A_{\rho}^{(\ell)}\right]_{j,i,\cdot}=\mathbf{e}_{\left[\mathcal{R}^{(\ell)}_j\right]_i}\\\left[B_{\rho}^{(\ell)}\right]_{j,i}=0\end{cases}$$for every $j=1,\dots,d^{(\ell)}$ and $i=1,\dots,r$ with $r=\left\vert\mathcal{R}^{(\ell)}_1\right\vert$.
+\end{tproof}
+
+\begin{example}\label{eg:maso_pooling}
+    \begin{enumerate}
+        \item[]
+        \item For max pooling we have $r=\left\vert\mathcal{R}^{(\ell)}_1\right\vert$, and $$\begin{cases}\left[A_{\rho}^{(\ell)}\right]_{j,i,\cdot}=\mathbf{e}_{\left[\mathcal{R}^{(\ell)}_j\right]_i}\\\left[B_{\rho}^{(\ell)}\right]_{j,i}=0\end{cases}$$for every $j=1,\dots,d^{(\ell)}$ and $i=1,\dots,r$.
+        \item For mean pooling we have $r=1$, and $$\begin{cases}\left[A_{\rho}^{(\ell)}\right]_{j,1,\cdot}=\frac{1}{\left\vert\mathcal{R}_j\right\vert}\sum_{t\in\mathcal{R}_j}\mathbf{e}_t\\\left[B_{\rho}^{(\ell)}\right]_{j,1}=0\end{cases}$$for every $j=1,\dots,d^{(\ell)}$.
+    \end{enumerate}
+\end{example}
+
+Note that if the parameters $\mu^{(\ell)}$ and $\sigma^{(\ell)}$ for normalisation operators are fixed, then normalisation operators are just affine transformations and are thus max-affine splines. However, in the case of batch normalisation during and layer normalisation the parameter $\sigma^{(\ell)}$ depend non-linearly on the input and thus are not max-affine spline operators.
+
+\begin{proposition}
+    A skip connection operator $f_{\text{skip}}^{(\ell)}$ is a max-affine spline operator $S\left[A^{(\ell)}_{\text{skip}},B^{(\ell)}_{\text{skip}}\right]$.
+\end{proposition}
+
+\begin{tproof}
+    This follows analogously to Proposition \ref{prop:fc_maso} after modifying $f^{(\ell)}_{\text{skip}}$ to take input $\left(\mathbf{x},f_{\theta^{(\ell)}}^{(\ell)}(\mathbf{x})\right)^\top$, where we are concatenating the vectors.
+\end{tproof}
+
+\begin{proposition}[\citet{wangMaxAffineSplinePerspective2019}]
+    A recurrent connection operators $f^{(1,t)}_{\text{rec}}$ and $f_{\text{rec}}^{(\ell,t)}(\mathbf{x})$ are max-affine spline operators $S\left[A^{(1,t)}_{\text{rec}},B^{(1,t)}_{\text{rec}}\right]$ and $S\left[A^{(\ell,t)}_{\text{rec}},B^{(\ell,t)}_{\text{rec}}\right]$ respectively.
+\end{proposition}
+
+\begin{tproof}
+    This follows analogously to Proposition \ref{prop:fc_maso} after modifying $f^{(1,t)}_{\text{rec}}$ and $f_{\text{rec}}^{(\ell,t)}$ to take inputs $\left(\mathbf{x},\mathbf{z}^{(1,t-1)}\right)^\top$ and $\left(\mathbf{x},\mathbf{z}^{(\ell-1,t)},\mathbf{z}^{(\ell,t-1)}\right)$ respectively, where we are concatenating the vectors in each case.
+\end{tproof}
+
+\begin{proposition}\label{prop:dn_layer_is_maso}
+    Any deep network layer as per Section \ref{subsec:layer}, is a max-affine spline operator.
+\end{proposition}
+
+\begin{pproof}
+    We consider a fully connected operator followed by an activation operation, with the understanding that the other cases follow analogously. It follows that 
+    \begin{align*}
+        S\left[A_{\sigma}^{(\ell)},B_{\sigma}^{(\ell)}\right]&\left(W_{\text{fc}}^{(\ell)}\mathbf{x}+b_{\text{fc}}^{(\ell)}\right)\\&=\begin{pmatrix}\max_{j=1,\dots,r^{(\sigma)}}\left(\left(\left[A_{\sigma}^{(\ell)}\right]_{1,j,\cdot}\right)^\top\left(W_{\text{fc}}^{(\ell)}\mathbf{x}+b_{\text{fc}}^{(\ell)}\right)+\left[B_{\sigma}^{(\ell)}\right]_{1,j}\right)\\\vdots\\\max_{j=1,\dots,r^{(\sigma)}}\left(\left(\left[A_{\sigma}^{(\ell)}\right]_{d^{(\ell)},j,\cdot}\right)^\top\left(W_{\text{fc}}^{(\ell)}\mathbf{x}+b_{\text{fc}}^{(\ell)}\right)+\left[B_{\sigma}^{(\ell)}\right]_{d^{(\ell)},j}\right)\end{pmatrix}\\&=\begin{pmatrix}\max_{j=1,\dots,r^{(\sigma)}}\left(\left(\left(W_{\text{fc}}^{(\ell)}\right)^\top\left[A_{\sigma}^{(\ell)}\right]_{1,j,\cdot}\right)^\top\mathbf{x}+\left(\left[A_{\sigma}^{(\ell)}\right]_{1,j,\cdot}\right)^\top b_{\text{fc}}^{(\ell)}+\left[B_{\sigma}^{(\ell)}\right]_{1,j}\right)\\\vdots\\\max_{j=1,\dots,r^{(\sigma)}}\left(\left(\left(W_{\text{fc}}^{(\ell)}\right)^\top\left[A_{\sigma}^{(\ell)}\right]_{d^{(\ell)},j,\cdot}\right)^\top\mathbf{x}+\left(\left[A_{\sigma}^{(\ell)}\right]_{d^{(\ell)},j,\cdot}\right)^\top b_{\text{fc}}^{(\ell)}+\left[B_{\sigma}^{(\ell)}\right]_{k,j}\right)\end{pmatrix}.
+    \end{align*}
+    Therefore, $\left(\sigma\circ f^{(\ell)}_{\text{fc}}\right)(\mathbf{x})=S\left[A^{(\ell)},B^{(\ell)}\right](\mathbf{x})$ where $$\begin{cases}\left[A^{(\ell)}\right]_{i,j,\cdot}=\left(W_{\text{fc}}^{(\ell)}\right)^\top\left[A_{\sigma}^{(\ell)}\right]_{i,j,\cdot}\\\left[B^{(\ell)}\right]_{i,j}=\left[B_{\sigma}^{(\ell)}\right]_{i,j}+\left\langle b_{\text{fc}}^{(\ell)},\left[A_{\sigma}\right]_{i,j,\cdot}\right\rangle,\end{cases}$$for $j=1,\dots,r^{(\sigma)}$ and $i=1,\dots,d^{(\ell)}$.
+\end{pproof}
+
+\begin{example}
+    For an affine transformation followed by an activation function we have $$\begin{cases}\left[A^{(\ell)}\right]_{i,j,\cdot}=\left(W_{\text{fc}}^{(\ell)}\right)^\top\left[A_{\sigma}^{(\ell)}\right]_{i,j,\cdot}\\\left[B^{(\ell)}\right]_{i,j}=\left[b_{\sigma}^{(\ell)}\right]_{i,j}+\left\langle b_{\text{fc}}^{(\ell)},\left[A_{\sigma}\right]_{i,j,\cdot}\right\rangle,\end{cases}$$for $j=1,\dots,r^{(\sigma)}$ and $i=1,\dots,d^{(\ell)}$.
+\end{example}
+
+\textcolor{Red}{maybe add the other combinations as exercises}
+
+\section{Deep Networks as Spline Operators}\label{sec:dn_as_so}
+
+\begin{proposition}
+    The composition of max-affine spline operators is a continuous piecewise affine spline operator.
+\end{proposition}
+
+\begin{tproof}
+    Without loss of generality we consider max-affine spline operators $s^{(1)}\left[A^{(1)},B^{(1)}\right]:\mathbb{R}^d\to\mathbb{R}^{d^{(1)}}$ and $s^{(2)}\left[A^{(2)},B^{(2)}\right]:\mathbb{R}^{d_1}\to\mathbb{R}$. In particular, suppose the induced partitioning of $s^{(1)}$ is $\left\{\omega^{(1)}_1,\dots,\omega^{(1)}_{r^{(1)}}\right\}$ and the induced partitioning of $s^{(2)}$ is $\left\{\omega^{(2)}_1,\dots,\omega^{(2)}_{r^{(2)}}\right\}$. So that, $A^{(1)}\in\mathbb{R}^{r^{(1)}\times d}$, $B^{(1)}\in\mathbb{R}^{r^{(1)}}$, $A^{(2)}\in\mathbb{R}^{r^{(2)}}$ and $B^{(2)}\in\mathbb{R}$. Then,
+    \begin{align*}
+        \left(s_2\circ s_1\right)(\mathbf{x})&=s_2\left(\max_{j=1,\dots,r^{(1)}}\left(\left\langle\left[A^{(1)}\right]_{j,\cdot},\mathbf{x}\right\rangle+\left[B^{(1)}\right]_j\right)\right)\\&=\max_{j^\prime=1,\dots,r^{(2)}}\left(\left[A^{(2)}\right]_{j^\prime}\left(\max_{j=1,\dots,r^{(1)}}\left(\left\langle\left[A^{(1)}\right]_{j,\cdot},\mathbf{x}\right\rangle+\left[B^{(1)}\right]_j\right)\right)+B^{(2)}\right).
+    \end{align*}
+    In particular, $$\left(s_2\circ s_1\right)(\mathbf{x})=\sum_{j^\prime=1}^{r^{(2)}}\sum_{j=1}^{r^{(1)}}\left(\left\langle\left[A^{(2)}\right]_{j^\prime}\left[A^{(1)}\right]_{j,\cdot},\mathbf{x}\right\rangle+\left[A^{(2)}\right]_{j^\prime}\left[B^{(1)}\right]_j+B^{(2)}\right)\mathbf{1}_{\left\{\mathbf{x}\in\omega^{(1)}_j\right\}\cap\left\{s_1(\mathbf{x})\in\omega^{(2)}_{j^\prime}\right\}}.$$Therefore, $s_1\circ s_2$ is an affine spline function. Continuity follows as $s_1$ and $s_2$ are continuous from statement 3 of Proposition \ref{prop:max_affine_spline_properties} and so their composition is also continuous.
+\end{tproof}
+
+\begin{corollary}
+    A deep network constructed from layers as per Section \ref{subsec:layer}, is a continuous piecewise affine spline operator.
+\end{corollary}
+
+\begin{remark}
+    Since the deep network mapping is an affine spline operator, it follows that the prediction (or feature map) is signal dependent as the mapping is dependent on which partition the signal fall into. 
+\end{remark}
+
+\section{Constructions}\label{sec:constructions}
+
+\subsection{Convolutional Neural Network}\label{subsec:conv_net}
+
+The input-output formula for a convolutional neural network utilising a \textcolor{Blue}{convolution operator}, \textcolor{Green}{ReLU activation operator}, a \textcolor{Bittersweet}{max-pooling operator} and a \textcolor{Purple}{fully connected operator} is,\footnote{Through this analysis we are streamlining notation by adopting the notation convention from statement 2 of Remark \ref{rem:affine_spline}.} 
+\begin{align}\label{eq:cnn_formulation}
+    \mathbf{z}_{\text{CNN}}^{(L)}(\mathbf{x})&=\textcolor{Purple}{W_{\text{fc}}^{(L)}}\underbrace{\left(\prod_{\ell=L-1}^1\textcolor{Bittersweet}{A_{\rho}^{(\ell)}[\mathbf{x}]}\textcolor{Green}{A_{\sigma}^{(\ell)}[\mathbf{x}]}\textcolor{Blue}{\mathbf{C}_{\text{conv}}^{(\ell)}}\right)}_{A_{\text{CNN}}[\mathbf{x}]}\mathbf{x}\nonumber\\&+\underbrace{\textcolor{Purple}{W_{\text{fc}}^{(L)}}\sum_{\ell=1}^{L-1}\left(\prod_{j=L-1}^{\ell+1}\textcolor{Bittersweet}{A_{\rho}^{(j)}[\mathbf{x}]}\textcolor{Green}{A_{\sigma}^{(j)}[\mathbf{x}]}\textcolor{Blue}{\mathbf{C}_{\text{conv}}^{(j)}}\right)\left(\textcolor{Bittersweet}{A_{\rho}^{(\ell)}[\mathbf{x}]}\textcolor{Green}{A_{\sigma}^{(\ell)}[\mathbf{x}]}\textcolor{Blue}{b_{\text{conv}}^{(\ell)}}\right)}_{B_{\text{CNN}}[\mathbf{x}]}\nonumber\\&+\textcolor{Purple}{b_{\text{fc}}^{(L)}}.
+\end{align}
+
+We can collapse \eqref{eq:cnn_formulation} into 
+\begin{equation}\label{eq:collapse_of_cnn_formulation}
+    \mathbf{z}^{(L)}_{\text{CNN}}(\mathbf{x})=W_{\text{fc}}^{(L)}\mathbf{z}_{\text{CNN}}^{(L-1)}+B_{\text{fc}}^{(L)},
+\end{equation}
+where $$\mathbf{z}_{\text{CNN}}^{(L-1)}(\mathbf{x})=A_{\text{CNN}}[\mathbf{x}]\mathbf{x}+B_{\text{CNN}}[\mathbf{x}],$$can be thought of as a signal-dependent affine formula for the featurization of the signal $\mathbf{x}$.
+
+\subsection{ResNet}\label{subsec:resnet}
+
+A ResNet utilises skip-connections. The linear skip-connection involves a \textcolor{Blue}{convolution operator} followed by an \textcolor{Green}{activation operator} in parallel with a second \textcolor{Bittersweet}{convolution operator}, $$\mathbf{z}^{(\ell)}(\mathbf{x})=\textcolor{Bittersweet}{\mathbf{C}_{\text{skip}}^{(\ell)}}\mathbf{z}^{(\ell-1)}(\mathbf{x})+\textcolor{Green}{A_{\sigma}^{(\ell)}[\mathbf{x}]}\left(\textcolor{Blue}{\mathbf{C}_{\text{conv}}^{(\ell)}}\mathbf{z}^{(\ell-1)}(\mathbf{x})+\textcolor{Blue}{b_{\text{conv}}^{(\ell)}}\right)+\textcolor{Bittersweet}{b_{\text{skip}}^{(\ell)}}.$$Pooling in a ResNet is achieved by subsampling the rows of $\mathbf{C}_{\text{skip}}^{(\ell)}$, $A^{(\ell)}[\mathbf{x}]$ and $b_{\text{skip}}^{(\ell)}$. The input-output formula for a ResNet constructed from a \textcolor{Blue}{convolution operator}, \textcolor{Green}{ReLU activation operator}, \textcolor{Bittersweet}{max-pooling operator} in parallel with \textcolor{BlueGreen}{convolution operator} and with a last \textcolor{Purple}{fully connected operator} is 
+\begin{align}\label{eq:resnet_formulation}
+    \mathbf{z}_{\text{RES}}^{(L)}(\mathbf{x})&=\textcolor{Purple}{W_{\text{fc}}^{(L)}}\underbrace{\prod_{\ell=L-1}^1\left(\textcolor{Bittersweet}{A_{\rho}^{(\ell)}[\mathbf{x}]}\textcolor{Green}{A_{\sigma}^{(\ell)}[\mathbf{x}]}\textcolor{Blue}{\mathbf{C}_{\text{conv}}^{(\ell)}}+\textcolor{BlueGreen}{\mathbf{C}^{(\ell)}_{\text{skip}}}\right)}_{A_{\text{RES}}[\mathbf{x}]}\mathbf{x}\nonumber\\&+\textcolor{Purple}{W_{\text{fc}}^{(L)}}\underbrace{\sum_{\ell=L-1}^1\left(\prod_{i=L-1}^{\ell+1}\left(\textcolor{Bittersweet}{A_{\rho}^{(\ell)}[\mathbf{x}]}\textcolor{Green}{A_{\sigma}^{(\ell)}[\mathbf{x}]}\textcolor{Blue}{\mathbf{C}_{\text{conv}}^{(\ell)}}+\textcolor{BlueGreen}{\mathbf{C}_{\text{skip}}^{(\ell)}}\right)\right)\left(\textcolor{Bittersweet}{A_{\rho}^{(\ell)}[\mathbf{x}]}\textcolor{Green}{A_{\sigma}^{(\ell)}[\mathbf{x}]}\textcolor{Blue}{b_{\text{conv}}^{(\ell)}}+\textcolor{BlueGreen}{b_{\text{skip}}^{(\ell)}}\right)}_{B_{\text{RES}}[\mathbf{x}]}\nonumber\\&+\textcolor{Purple}{b_{\text{fc}}^{(L)}}.
+\end{align}
+We see that \eqref{eq:resnet_formulation} has a similar functional form to \eqref{eq:cnn_formulation}, namely, a signal dependent featurizer followed by a linear classifier. In this case, there is an additional linear path from the input to the output. 
+
+\subsection{Recurrent Neural Networks}\label{subsec:rnn}
+
+A recurrent neural network evolves hidden states through time, say up to time $T$, and through depth using layers. Namely, at the first layer, at time step $t$, the hidden state is updated using the \textcolor{Blue}{hidden state of the previous time step} and the \textcolor{Green}{input at the current time step} as
+\begin{align}\label{eq:rnn_input_formulation}
+    \mathbf{z}_{\text{RNN}}^{(1,t)}=&A_{\sigma}^{(1,t)}\left(W_{\text{in}}^{(1)}\textcolor{Green}{x^t}+W_{\text{rec}}^{(1)}\textcolor{Blue}{\mathbf{z}_{\text{RNN}}^{(1,t-1)}}+b^{(1)}\right)\nonumber\\&\cdot\left(W_{\text{in}}^{(1)}\textcolor{Green}{x^t}+W_{\text{rec}}^{(1)}\textcolor{Blue}{\mathbf{z}_{\text{RNN}}^{(1,t-1)}}+b^{(1)}\right)\nonumber\\&+b_{\sigma}^{(1,t)}.
+\end{align}
+At the $\ell^{\text{th}}>1$ layer, the hidden state is updated using the \textcolor{Blue}{hidden state of the previous time step at layer $\ell$}, the \textcolor{Green}{hidden state of the current time step at layer $\ell-1$} and the \textcolor{Bittersweet}{input at the current time step} as
+\begin{align}\label{eq:rnn_hidden_layer_formulation}
+    \mathbf{z}_{\text{RNN}}^{(\ell,t)}=&A_{\sigma}^{(\ell,t)}\left(W_{\text{in}}^{(\ell)}\textcolor{Bittersweet}{x^t}+W_{\text{rec}}^{(\ell)}\textcolor{Blue}{\mathbf{z}_{\text{RNN}}^{(\ell,t-1)}}+W_{\text{up}}^{(\ell)}\textcolor{Green}{\mathbf{z}_{\text{RNN}}^{(\ell-1,t)}}+b^{(\ell)}\right)\nonumber\\&\cdot\left(W_{\text{in}}^{(\ell)}\textcolor{Bittersweet}{x^t}+W_{\text{rec}}^{(\ell)}\textcolor{Blue}{\mathbf{z}_{\text{RNN}}^{(\ell,t-1)}}+W_{\text{up}}^{(\ell)}\textcolor{Green}{\mathbf{z}_{\text{RNN}}^{(\ell-1,t)}}+b^{(\ell)}\right)\nonumber\\&+b_{\sigma}^{(\ell,t)}.
+\end{align}
+
+One can unroll \eqref{eq:rnn_input_formulation} and \eqref{eq:rnn_hidden_layer_formulation} to obtain the input-output formulation of the input sequence $\left(x^1,\dots,x^T\right)$.
+
+\subsection{Transformers}\label{subsec:transformers}
+
+\section{References}
+
+Section \ref{sec:dno_as_so}, Section \ref{sec:dn_as_so}, Section \ref{subsec:conv_net}, Section \ref{subsec:resnet} and Section \ref{subsec:rnn} from \citet{balestrieroMadMaxAffine2018}.

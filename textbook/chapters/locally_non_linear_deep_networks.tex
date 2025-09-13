@@ -1,0 +1,139 @@
+\section{Introduction}
+
+Our exploration thus far has been limited to deep networks whose layers are affine transformations followed by a piecewise linear activation or pooling operator. Although Theorem \ref{thm:universality} reassures us that this is sufficient for deep networks approximating arbitrary continuous operators, in this chapter we explore how one can extend our current ideas to deep networks employing locally non-linear activation or pooling operators. This is done by introducing a probabilistic perspective on the current framework by noting its connection to vector quantization. We first develop the vector quantization theory, and then show how it can be used to derive a spectrum of deep network architectures through so-called $\beta$-VQ inference.
+
+\section{Vector Quantization}\label{sec:vector_quantization}
+
+For a deep network we can formulate its $\ell^{\text{th}}$ intermediary operator as a max-affine spline operator $S\left[A^{(\ell)},B^{(\ell)}\right]$ such that 
+\begin{equation}\label{eq:maso_for_vq}
+    \left[\mathbf{z}^{(\ell)}\right]_i=\max_{j=1,\dots,r^{(\ell)}}\left(\left\langle\left[A^{(\ell)}\right]_{i,j,\cdot},\mathbf{z}^{(\ell-1)}\right\rangle+\left[B^{(\ell)}\right]_{i,j}\right),
+\end{equation}
+where $\mathbf{z}^{(\ell)}\in\mathbb{R}^{d^{(\ell)}}$, $\mathbf{z}^{(\ell-1)}\in\mathbb{R}^{d^{(\ell-1)}}$, and $r^{(\ell)}$ is the number of regions in the partition of $\mathbb{R}^{d^{(\ell-1)}}$. Importantly, this max-affine spline is completely determined by the slopes $A\in\mathbb{R}^{d^{(\ell)}\times r^{(\ell)}\times d^{(\ell-1)}}$ and offsets $B\in\mathbb{R}^{d^{(\ell)}\times r^{(\ell)}}$. It computes an optimized partition of of $\mathbb{R}^{d^{(\ell-1)}}$ which is equivalent to a vector quantization.
+
+Consider the matrix $T_H^{(\ell)}\in\mathbb{R}^{d^{(\ell)}\times r^{(\ell)}}$ whose $i^\text{th}$ row is the one-hot vector with index $$\left[\mathbf{t}^{(\ell)}\right]_i=\mathrm{argmax}_{j=1,\dots,r^{(\ell)}}\left(\left\langle\left[A^{(\ell)}\right]_{i,j,\cdot},\mathbf{z}^{(\ell-1)}\right\rangle+\left[B^{(\ell)}\right]_{i,j}\right).$$ This is the hard-VQ matrix which allows us to explicitly highlight the vector quantization aspect of \eqref{eq:maso_for_vq} as
+\begin{equation}\label{eq:maso_as_vq}
+    \left[\mathbf{z}^{(\ell)}\right]_i=\sum_{j=1}^{r^{(\ell)}}\left[T_H^{(\ell)}\right]_{i,j}\left(\left\langle\left[A^{(\ell)}\right]_{i,j,\cdot},\mathbf{z}^{(\ell-1)}\right\rangle+\left[B^{(\ell)}\right]_{i,j}\right),
+\end{equation}
+
+\section{Soft Max-Affine Spline Operators}\label{sec:smaso}
+
+Consider a single unit $i$ from the $\ell^{\text{th}}$ layer, which has $d^{(\ell)}$ total units, of a max-affine spline operator based deep network.
+
+\begin{proposition}\label{prop:maso_vq_is_kmeans}
+    Given $-\frac{1}{2}\left\Vert\left[A^{(\ell)}_{i,j,\cdot}\right]\right\Vert^2=\left[B^{(\ell)}\right]_{i,j}$, the max-affine spline operator vector quantization partition corresponds to $r^{(\ell)}$-means clustering with centroids $\left[A\right]_{i,j,\cdot}$ computed through $$\left[\widehat{\mathbf{t}^{(\ell)}}\right]_i=\argmin_{j=1,\dots,r^{(\ell)}}\left\Vert\left[A^{(\ell)}\right]_{i,j,\cdot}-\mathbf{z}^{(\ell-1)}\right\Vert^2.$$
+\end{proposition}
+
+\begin{tproof}
+    Observe that,
+    \begin{align*}
+        \left\Vert\left[A^{(\ell)}\right]_{i,j,\cdot}-\mathbf{z}^{(\ell-1)}\right\Vert^2&=\left\langle\left[A^{(\ell)}\right]_{i,j,\cdot}-\mathbf{z}^{(\ell-1)},\left[A^{(\ell)}\right]_{i,j,\cdot}-\mathbf{z}^{(\ell-1)}\right\rangle\\&=\left\Vert\left[A^{(\ell)}\right]_{i,j,\cdot}\right\Vert^2-2\left\langle\left[A^{(\ell)}\right]_{i,j,\cdot},\mathbf{z}^{(\ell-1)}\right\rangle\\&+\left\Vert\mathbf{z}^{(\ell-1)}\right\Vert^2\\&=-2\left[B^{(\ell)}\right]_{i,j}-2\left\langle\left[A^{(\ell)}\right]_{i,j,\cdot},\mathbf{z}^{(\ell-1)}\right\rangle\\&+\left\Vert\mathbf{z}^{(\ell-1)}\right\Vert^2.
+    \end{align*}
+    Therefore, 
+    \begin{align*}
+        &\argmin_{j=1,\dots,r^{(\ell)}}\left\Vert\left[A^{(\ell)}\right]_{i,j,\cdot}-\mathbf{z}^{(\ell-1)}\right\Vert^2\\&=\argmax_{j=1,\dots,r^{(\ell)}}\left(\left\langle\left[A^{(\ell)}\right]_{i,j,\cdot},\mathbf{z}^{(\ell-1)}\right\rangle+\left[B^{(\ell)}\right]_{i,j}\right).
+    \end{align*}
+\end{tproof}
+
+Proposition \ref{prop:maso_vq_is_kmeans}, determines the selection variable $\left[\mathbf{t}^{(\ell)}\right]_i$ deterministically. Instead, one can consider it as an unobserved categorical variable $\left[\mathbf{t}^{(\ell)}\right]_i\sim\text{Cat}\left(\left[\pi^{(\ell)}\right]_{i,\cdot}\right)$, where $\left[\pi^{(\ell)}\right]_{i,\cdot}\in\Delta_{r^{(\ell)}}$.\footnote{$\Delta_{r^{(\ell)}}$ denotes the simplex of dimension $r^{(\ell)}$. That is, the subset of $\mathbb{R}^{r^{(\ell)}}$ whose coordinate sum is equal to one.}With this, we can construct a generative model for $\mathbf{z}^{(\ell-1)}$ as a mixture of $r^{(\ell)}$ isotropic Gaussians with mean $\left[A^{(\ell)}\right]_{i,j,\cdot}\in\mathbb{R}^{d^{(\ell-1)}}$ and covariance $\tau^2$ as
+\begin{equation}\label{eq:smaso_gmm}
+    \mathbf{z}^{(\ell-1)}=\sum_{j=1}^{r^{(\ell)}}\mathbf{1}_{\left\{\left[\mathbf{t}^{(\ell)}\right]_i=j\right\}}\left[A^{(\ell)}\right]_{i,j,\cdot}+\epsilon,
+\end{equation}
+where $\epsilon\sim\text{N}\left(0,I\tau^2\right)$.
+
+\section{Vector Quantization Inference}\label{sec:vq_inference}
+
+\subsection{Hard-VQ Inference}
+
+In hard inference, the selection variable $\left[\mathbf{t}^{(\ell)}\right]_i$ is computed via the maximum a posteriori principle as $$\left[\widehat{\mathbf{t}^{(\ell)}}\right]_i=\argmax_{t=1,\dots,r^{(\ell)}}p\left(t\vert\mathbf{z}^{(\ell-1)}\right).$$
+
+\begin{theorem}
+    The maximum a posteriori inference of the latent selection variable $\left[\widehat{\mathbf{t}^{(\ell)}}\right]_i$ can be computed through the max-affine spline operator hard-VQ $$\left[\widehat{\mathbf{t}^{(\ell)}}\right]_i=\argmax_{t=1,\dots,r^{(\ell)}}\left\langle\left[A^{(\ell)}\right]_{i,t,\cdot},\mathbf{z}^{(\ell-1)}\right\rangle+\left[B^{(\ell)}\right]_{i,t}$$for all $A^{(\ell)}$ and $B^{(\ell)}$, when $\tau^2=1$ and $$\left[\pi^{(\ell)}\right]_{i,t}=\frac{\exp\left(\left[B^{(\ell)}\right]_{i,t}+\frac{1}{2}\left\Vert\left[A^{(\ell)}\right]_{i,t,\cdot}\right\Vert^2\right)}{\sum_{j=1}^{r^{(\ell)}}\exp\left(\left[B^{(\ell)}\right]_{i,t}+\frac{1}{2}\left\Vert\left[A^{(\ell)}\right]_{i,j,\cdot}\right\Vert^2\right)}$$for $t=1,\dots,r^{(\ell)}$. The optimal hard-VQ selection matrix is then given by $\left[\widehat{T}_H^{(\ell)}\right]_{i,t}=\mathbf{1}_{\left\{t=\left[\widehat{\mathbf{t}^{(\ell)}}\right]_i\right\}}$.
+\end{theorem}
+
+\begin{tproof}
+    Observe that
+    \begin{align*}
+        \argmax_{t=1,\dots,r^{(\ell)}}&\left(p\left(t\vert\mathbf{z}^{(\ell-1)}\right)\right)=\argmax_{t=1,\dots,r^{(\ell)}}\left(p\left(t\vert\mathbf{z}^{(\ell-1)}\right)p\left(\mathbf{z}^{(\ell-1)}\right)\right)\\&=\argmax_{t=1,\dots,r^{(\ell)}}\left(p\left(\mathbf{z}^{(\ell-1)}\vert t\right)p\left(t\right)\right)\\&=\argmax_{t=1,\dots,r^{(\ell)}}\left(\log\left(p\left(\mathbf{z}^{(\ell-1)}\vert t\right)p\left(t\right)\right)-\frac{1}{2}\left\Vert\mathbf{z}^{(\ell-1)}\right\Vert^2\right)\\&=\argmax_{t=1,\dots,r^{(\ell)}}\left(\log\left(p\left(\mathbf{z}^{(\ell-1)}\vert t\right)p\left(t\right)\right)+\left\langle\left[A^{(\ell)}\right]_{i,t,\cdot},\mathbf{z}^{(\ell-1)}\right\rangle-\frac{1}{2}\left\Vert\left[A^{(\ell)}\right]_{i,t,\cdot}\right\Vert^2\right)\\&=\argmax_{t=1,\dots,r^{(\ell)}}\left(\log\left(p\left(\mathbf{z}^{(\ell-1)}\vert t\right)\right)+\log\left(p(t)\right)+\left\langle\left[A^{(\ell)}\right]_{i,t,\cdot},\mathbf{z}^{(\ell-1)}\right\rangle-\frac{1}{2}\left\Vert\left[A^{(\ell)}\right]_{i,t,\cdot}\right\Vert^2\right)\\&=\argmax_{t=1,\dots,r^{(\ell)}}\left(\log(p(t))+\left\langle\left[A^{(\ell)}\right]_{i,t,\cdot},\mathbf{z}^{(\ell-1)}\right\rangle-\frac{1}{2}\left\Vert\left[A^{(\ell)}\right]_{i,t,\cdot}\right\Vert^2\right)\\&=\argmax_{t=1,\dots,r^{(\ell)}}\left(\log\left(\frac{\exp\left(\left[B^{(\ell)}\right]_{i,t}+\frac{1}{2}\left\Vert\left[A^{(\ell)}\right]_{i,t,\cdot}\right\Vert^2\right)}{\sum_{j=1}^{r^{(\ell)}}\exp\left(\left[B^{(\ell)}\right]_{i,t}+\frac{1}{2}\left\Vert\left[A^{(\ell)}\right]_{i,j,\cdot}\right\Vert^2\right)}\right)+\left\langle\left[A^{(\ell)}\right]_{i,t,\cdot},\mathbf{z}^{(\ell-1)}\right\rangle-\frac{1}{2}\left\Vert\left[A^{(\ell)}\right]_{i,t,\cdot}\right\Vert^2\right)\\&=\argmax_{t=1,\dots,r^{(\ell)}}\left(\left[B^{(\ell)}\right]_{i,t}+\frac{1}{2}\left\Vert\left[A^{(\ell)}\right]_{i,t,\cdot}\right\Vert+\left\langle\left[A^{(\ell)}\right]_{i,t,\cdot},\mathbf{z}^{(\ell-1)}\right\rangle-\frac{1}{2}\left\Vert\left[A^{(\ell)}\right]_{i,t,\cdot}\right\Vert^2\right)\\&=\argmax_{t=1,\dots,r^{(\ell)}}\left(\left\langle\left[A^{(\ell)}\right]_{i,t,\cdot},\mathbf{z}^{(\ell-1)}\right\rangle+\left[B^{(\ell)}\right]_{i,t}\right).
+    \end{align*}
+\end{tproof}
+
+\subsection{Soft-VQ Inference}
+
+One can replace the one-hot entries of the hard-VQ matrix with the probability that the layer input belongs to a given region, 
+\begin{align}\label{eq:soft_vq_entries}
+    \left[\widehat{T_S^{(\ell)}}\right]_{i,t}&=p\left(\left[\mathbf{t}^{(\ell)}\right]_i=t\vert\mathbf{z}^{(\ell-1)}\right)\nonumber\\&=\frac{\exp\left(\left\langle\left[A^{(\ell)}\right]_{i,t,\cdot},\mathbf{z}^{(\ell-1)}\right\rangle+\left[B^{(\ell)}\right]_{i,t,\cdot}\right)}{\sum_{j=1}^{r^{(\ell)}_i}\exp\left(\left\langle\left[A^{(\ell)}\right]_{i,j,\cdot},\mathbf{z}^{(\ell-1)}\right\rangle+\left[B^{(\ell)}\right]_{i,j,\cdot}\right)}.
+\end{align}
+Leading to a soft inference of the categorical variable $\left[\mathbf{t}^{(\ell)}\right]_j$. Note that $T_S^{(\ell)}\to T_H^{(\ell)}$ as $\tau^2\to0$ in \eqref{eq:smaso_gmm}.
+
+\begin{theorem}\label{thm:soft_vq}
+    The entries of the soft-VQ matrix from \eqref{eq:soft_vq_entries} solve the entropy penalised maximization $$\left[\widehat{T_S^{(\ell)}}\right]_{i,\cdot}=\argmax_{\mathbf{t}\in\Delta_{r^{(\ell)}_i}}\left(\sum_{j=1}^{r^{(\ell)}_i}[\mathbf{t}]_j\left(\left\langle\left[A^{(\ell)}\right]_{i,j,\cdot},\mathbf{z}^{(\ell-1)}\right\rangle+\left[B^{(\ell)}\right]_{i,j}\right)+H(\mathbf{t})\right),$$where $H(\cdot)$ is the Shannon entropy.
+\end{theorem}
+
+\begin{tproof}
+    The optimization under consideration is
+    \begin{align*}
+        \left[T_S^{(\ell)}\right]_i&=\argmax_{\mathbf{u}\sim q^{(\ell)}_i}\left(\mathbb{E}_q\left(\log\left(p\left(\mathbf{z}^{(\ell-1)}\vert\mathbf{u}\right)p(\mathbf{u})\right)\right)+H\left(\mathbf{u}\right)\right)\\&=\argmax_{\mathbf{t}\in\Delta_{r^{(\ell)}_i}}\left(\sum_{j=1}^{r_i^{(\ell)}}[\mathbf{t}]_j\left(-\frac{\left\Vert\mathbf{z}^{(\ell-1)}-\mu_j\right\Vert^2}{2\tau^2}+\log\left(\pi_j\right)\right)-\sum_{j=1}^{r^{(\ell)}_i}[\mathbf{t}]_j\log\left([\mathbf{t}]_j\right)\right).
+    \end{align*}
+    Let 
+    \begin{align*}
+        \mathcal{L}(\mathbf{t})=&\sum_{j=1}^{r_i^{(\ell)}}[\mathbf{t}]_j\left(-\frac{\left\Vert\mathbf{z}^{(\ell-1)}-\mu_j\right\Vert^2}{2\tau^2}+\log\left(\pi_j\right)\right)\\&-\sum_{j=1}^{r^{(\ell)}_i}[\mathbf{t}]_j\log\left([\mathbf{t}]_j\right)+\lambda\left(\sum_{j=1}^{r^{(\ell)}_j}[\mathbf{t}]_j-1\right).
+    \end{align*}
+    Then$$\begin{cases}\frac{\partial\mathcal{L}}{\partial[\mathbf{t}]_p}=-\frac{\left\Vert\mathbf{z}^{(\ell-1)}-\mu_p\right\Vert^2}{2\tau^2}+\log\left(\pi_p\right)-\log\left([\mathbf{t}]_p\right)-1+\lambda\\\frac{\partial\mathcal{L}}{\partial\lambda}=\sum_{j=1}^{r^{(\ell)}_i}[\mathbf{t}]_j-1.\end{cases}$$Setting the derivatives to zero, it follows that $$[\mathbf{t}]_p=\exp\left(-\frac{\left\Vert\mathbf{z}^{(\ell-1)}-\mu_p\right\Vert^2}{2\tau^2}+\log\left(\pi_p\right)-1+\lambda\right)$$for $p=1,\dots,r^{(\ell)}_i$. In particular, $$\lambda=-\log\left(\sum_{p=1}^{r^{(\ell)}_i}\exp\left(-\frac{\left\Vert\mathbf{z}^{(\ell-1)}-\mu_p\right\Vert^2}{2\tau^2}+\log\left(\pi_p\right)-1\right)\right).$$Therefore, $$[\mathbf{t}]_p=\frac{\exp\left(-\frac{\left\Vert\mathbf{z}^{(\ell-1)}-\mu_p\right\Vert^2}{2\tau^2}+\log\left(\pi_p\right)\right)}{\sum_{j=1}^{r^{(\ell)}_i}\exp\left(-\frac{\left\Vert\mathbf{z}^{(\ell-1)}-\mu_j\right\Vert^2}{2\tau^2}+\log\left(\pi_j\right)\right)}$$for $p=1,\dots,r^{(\ell)}_i$.
+\end{tproof}
+
+\subsection{$\beta$-VQ Inference}
+
+A variable combination of hard-VQ inference and soft-VQ inference leads to $\beta$-VQ inference, which recovers hard, soft and linear VQ inference. More specifically,
+\begin{align*}
+    \left[\widehat{T_{\beta}^{(\ell)}}\right]_i&=\mathrm{argmax}_{\mathbf{t}\in\Delta_{r^{(\ell)}_i}}\left[\beta^{(\ell)}\right]_i\sum_{j=1}^{r^{(\ell)}_i}[\mathbf{t}]_j\left(\left\langle\left[A^{(\ell)}\right]_{i,j,\cdot},\mathbf{z}^{(\ell-1)}\right\rangle+[B]_{i,j}\right)\\&+\left(1-\left[\beta^{(\ell)}\right]_i\right)H(\mathbf{t}).
+\end{align*}
+
+\begin{theorem}\label{thm:beta_vq_optimum}
+    The unique global optimum of $\beta$-VQ inference is $$\left[\widehat{T_{\beta}^{(\ell)}}\right]_{i,j}=\frac{\exp\left(\frac{\left[\beta^{(\ell)}\right]_i}{1-\left[\beta^{(\ell)}\right]_i}\left(\left\langle\left[A^{(\ell)}\right]_{i,j,\cdot},\mathbf{z}^{(\ell-1)}\right\rangle+\left[B^{(\ell)}\right]_{i,j}\right)\right)}{\sum_{t=1}^{r^{(\ell)}}\exp\left(\frac{\left[\beta^{(\ell)}\right]_i}{1-\left[\beta^{(\ell)}\right]_i}\left(\left\langle\left[A^{(\ell)}\right]_{i,t,\cdot},\mathbf{z}^{(\ell-1)}\right\rangle+\left[B^{(\ell)}\right]_{i,t}\right)\right)}.$$
+\end{theorem}
+
+\begin{tproof}
+    Proceeds in the same way as Theorem \ref{thm:soft_vq}, except with the convex combination provided by $\beta$. 
+\end{tproof}
+
+\begin{remark}
+    From Theorem \ref{thm:beta_vq_optimum} we observe that $\beta$-VQ recovers hard-VQ inference with $\beta=1$, soft-VQ inference with $\beta=\frac{1}{2}$ and linear max-affine spline operators with $\beta=0$.
+\end{remark}
+
+\section{Constructions}\label{sec:locally_non_linear_constructions}
+
+Using hard-VQ inference and soft-VQ inference, one can generate distinct deep networks given a set of parameters $A^{(\ell)}$ and $B^{(\ell)}$. More generally, one can generate a spectrum of different deep networks using $\beta$-VQ inference.
+
+\begin{proposition}\label{prop:relu_beta_vq}
+    The max-affine spline operator parameters $A^{(\ell)}$ and $B^{(\ell)}$ that induce the ReLU activation operator under hard-VQ inference induce the swish non-linearity under $\beta$-VQ inference with $$\left[\eta^{(\ell)}\right]_i=\frac{\left[\beta^{(\ell)}\right]_i}{1-\left[\beta^{(\ell)}\right]_i}.$$
+\end{proposition}
+
+\begin{tproof}
+    Recall statement 1 Example \ref{eg:maso_activation_operators} for the parameters of the ReLU activation operator. Using \eqref{eq:maso_as_vq} and Theorem \ref{thm:beta_vq_optimum}, we have
+    \begin{align*}
+        \left[\mathbf{z}^{(\ell)}\right]_i&=\left[T_{\beta}^{(\ell)}\right]_{i,2}\left[\mathbf{z}^{(\ell-1)}\right]_i\\&=\frac{\exp\left(\frac{\left[\beta^{(\ell)}\right]_i}{1-\left[\beta^{(\ell)}\right]_i}\left[\mathbf{z}^{(\ell-1)}\right]_i\right)}{1+\exp\left(\frac{\left[\beta^{(\ell)}\right]_i}{1-\left[\beta^{(\ell)}\right]_i}\left[\mathbf{z}^{(\ell-1)}\right]_i\right)}\left[\mathbf{z}^{(\ell-1)}\right]_i\\&=\frac{1}{1+\exp\left(-\frac{\left[\beta^{(\ell)}\right]_i}{1-\left[\beta^{(\ell)}\right]_i}\left[\mathbf{z}^{(\ell-1)}\right]_i\right)}\left[\mathbf{z}^{(\ell-1)}\right]_i\\&=\sigma_{\text{sig}}\left(\frac{\left[\beta^{(\ell)}\right]_i}{1-\left[\beta^{(\ell)}\right]_i}\left[\mathbf{z}^{(\ell-1)}\right]_i\right)\left[\mathbf{z}^{(\ell-1)}\right]_i\\&=\sigma_{\text{swish}}\left(\left[\mathbf{z}^{(\ell-1)}\right]_i;\frac{\left[\beta^{(\ell)}\right]_i}{1-\left[\beta^{(\ell)}\right]_i}\right)
+    \end{align*}
+\end{tproof}
+
+\begin{remark}
+    With $\beta=\frac{1}{2}$, namely soft-VQ inference, we recover the sigmoid gated linear activation operator in Proposition \ref{prop:relu_beta_vq}.
+\end{remark}
+
+\begin{proposition}\label{prop:maxpooling_beta_vq}
+    The max-affine spline operator parameters $A^{(\ell)}$ and $B^{(\ell)}$ that induce the max-pooling operators under hard-VQ inference induce local-importance-pooling with $g(x)=\exp\left(\frac{\left[\beta^{(\ell)}\right]_i}{1-\left[\beta^{(\ell)}\right]_i}x\right)$ under $\beta$-VQ inference.
+\end{proposition}
+
+\begin{tproof}
+    Recall statement 1 of Example \ref{eg:maso_pooling} for the parameters of the max-pooling operator. Using \eqref{eq:maso_as_vq} and Theorem \ref{thm:beta_vq_optimum}, we have
+    \begin{align*}
+        \left[\mathbf{z}^{(\ell)}\right]_i&=\sum_{j=1}^r\left[T^{(\ell)}_{\beta}\right]_{i,j}\left[\mathbf{z}^{(\ell-1)}\right]_{\left[\mathcal{R}_i^{(\ell)}\right]_j}\\&=\sum_{j=1}^r\frac{\exp\left(\frac{\left[\beta^{(\ell)}\right]_i}{1-\left[\beta^{(\ell)}\right]_i}\left[\mathbf{z}^{(\ell-1)}\right]_{\left[\mathcal{R}^{(\ell)}_i\right]_j}\right)}{\sum_{t=1}^r\exp\left(\frac{\left[\beta^{(\ell)}\right]_i}{1-\left[\beta^{(\ell)}\right]_i}\left[\mathbf{z}^{(\ell-1)}\right]_{\left[\mathcal{R}^{(\ell)}_i\right]_t}\right)}\left[\mathbf{z}^{(\ell-1)}\right]_{\left[\mathcal{R}_i^{(\ell)}\right]_j}
+    \end{align*}
+\end{tproof}
+
+\begin{remark}
+    With $\beta=\frac{1}{2}$, namely soft-VQ inference, we recover the softmax-pooling activation operator in Proposition \ref{prop:relu_beta_vq}.
+\end{remark}
+
+\section{References}
+
+Section \ref{sec:vector_quantization}, Section \ref{sec:smaso}, Section \ref{sec:vq_inference} and Section \ref{sec:locally_non_linear_constructions}.

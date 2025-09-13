@@ -1,0 +1,41 @@
+\section{Introduction}
+
+In the classical statical sense deep networks are over-parametrised, and thus their optimisation should lead to degenerate solutions to the task at hand. However, it is observed in practice that deep networks arrive at remarkably generalisable solutions, despite having the capacity to memorise their training. This suggests that their in some redundancy in their capacity. Using our developed theory we can reason about how to judiciously reduce, or prune, parameters of the deep network in a manner that maintains its performance. Initially we formulate autoencoders to introduce the framework in which generative models operate in; then we focus on the generative component.
+
+\section{Characterisation of Techniques}
+
+Consider the $\ell^\text{th}$ layer of a deep network $$f^{(\ell)}(\mathbf{x})=\sigma\left(W^{(\ell)}+b^{(\ell)}\right),$$where $\sigma$ is a leaky ReLU with parameter $\eta$. Recall the induced a partition $\Omega^{(\ell)}$ of $\mathbb{R}^{d^{(\ell-1)}}$ given by  \eqref{eq:layer_partition_relu}, along with the functional decomposition of the layer operator \eqref{eq:functional_decomposition_layer_operator}.
+
+A pruning strategy is equivalent to applying a mask onto the layer's parameters, $$\left(W^{(\ell)},b^{(\ell)}\right)\mapsto\left(M^{(\ell)}\odot W^{(\ell)},m^{(\ell)}\odot b^{(\ell)}\right),$$where $M^{(\ell)}\in\{0,1\}^{d^{(\ell)}\times d^{(\ell-1)}}$ and $m^{(\ell)}\in\{0,1\}^{d^{(\ell)}}$.
+
+\begin{example}
+    \begin{enumerate}
+        \item[]
+        \item Unit pruning would employ $M^{(\ell)}=\tilde{m}^{(\ell)}\mathbf{1}^\top$ and $m^{(\ell)}=\tilde{m}^{(\ell)}$.
+        \item Parameter pruning would treat each entry of $M^{(\ell)}$ and $m^{(\ell)}$ independently.
+    \end{enumerate}
+\end{example}
+
+\section{Impact on Partition}
+
+\begin{proposition}
+    Setting any entry of $M^{(\ell)}$ or $m^{(\ell)}$ to zero impacts the per-region affine mappings $A^{(\ell)}_{\omega}$ and $b^{(\ell)}_{\omega}$, as well as the input space partition $\Omega$.
+\end{proposition}
+
+\begin{tproof}
+    This follows from the dependency of $A^{(\ell)}_{\omega}$, $b^{(\ell)}_{\omega}$ and $\Omega^{(\ell)}$ on $W^{(\ell)}$ and $b^{(\ell)}$ highlighted in \eqref{eq:layer_partition_relu} and \eqref{eq:functional_decomposition_layer_operator}.
+\end{tproof}
+
+Let $\left\vert\Omega^{(\ell)};W^{(\ell)},b^{(\ell)}\right\vert$ denote the number of regions in $\Omega^{(\ell)}$ when the layer is parametrized by $W^{(\ell)}$ and $b^{(\ell)}$.
+
+\begin{theorem}
+    We have $$\left\vert\Omega^{(\ell)};M^{(\ell)}\odot W^{(\ell)},m^{(\ell)}\odot b^{(\ell)}\right\vert\leq\left\vert\Omega^{(\ell)};W^{(\ell)},b^{(\ell)}\right\vert-\sum_{k=1}^{d^{(\ell)}}\mathbf{1}\left(\left\langle\left[M^{(\ell)}\right]_{k,\cdot},\mathbf{1}\right\rangle=0\right).$$In particular, for unit pruning we have $$\max_{W,b}\left\vert\Omega^{(\ell)};M^{(\ell)}\odot W,m^{(\ell)}\odot b\right\vert=2^{d^{(\ell)}-\left\langle m^{(\ell)},\mathbf{1}\right\rangle}.$$
+\end{theorem}
+
+\begin{tproof}
+    \textcolor{Red}{struggling with the proof here, is the statement of the theorem correct?}
+\end{tproof}
+
+\section{References}
+
+Chapter \ref{ch:pruning} from \cite{you2022maxaffine}.

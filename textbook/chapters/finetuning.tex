@@ -1,0 +1,31 @@
+\section{Introduction}
+
+Parameter fine-tuning is either done through additive, selective, re-parametrized or hybrid methods. The first involves introducing additional parameters to the model which are then trained, the second identifies a selection of parameters to retrain, the third decomposes the parameters into a low-rank representation which is then trained, and the fourth involves a combination of the previous. By utilising the fine-control of the parameterisation of deep network through the spline theory, deep network tuning can be done architecturally in proposed method named curvature tuning.
+
+\section{Smoothing Out Region Assignment}
+
+Recall that region assignment in a deep network operators according to an operation of the form 
+\begin{equation}\label{eq:region_assignment}
+    \left[\mathbf{t}^{(\ell)}\right]_i=\argmax_{j=1,\dots,r^{(\ell)}}\left(\left\langle\left[A^{(\ell)}\right]_{i,j\cdot},\mathbf{z}^{(\ell-1)}\right\rangle+\left[B\right]_{i,j}\right),
+\end{equation}
+which in Section \ref{sec:vector_quantization} we viewed as vector quantization. This lead to the $\beta$-VQ inference formulation, which showed that region assignment can be probabilistically relaxed to smooth out the non-linearity of deep networks
+\begin{equation}\label{eq:vq_curvature_tuning}
+    \left[\mathbf{t}_{\beta}^{(\ell)}\right]_i=\frac{\exp\left(\frac{\left[\beta^{(\ell)}\right]_i}{1-\left[\beta^{(\ell)}\right]_i}\left(\left\langle\left[A^{(\ell)}\right]_{i,j,\cdot},\mathbf{z}^{(\ell-1)}\right\rangle+\left[B^{(\ell)}\right]_{i,j}\right)\right)}{\sum_{t=1}^{r^{(\ell)}}\exp\left(\frac{\left[\beta^{(\ell)}\right]_i}{1-\left[\beta^{(\ell)}\right]_i}\left(\left\langle\left[A^{(\ell)}\right]_{i,t,\cdot},\mathbf{z}^{(\ell-1)}\right\rangle+\left[B^{(\ell)}\right]_{i,t}\right)\right)}.
+\end{equation}
+In particular, recall Proposition \ref{prop:relu_beta_vq} which shows how we can manoeuvrer from the linear regime, to the ReLU activation operator and then to the sigmoid gated linear activation operator simply by varying the parameter $\beta^{(\ell)}$ from zero to one. This has the effect of smoothing out the non-linearity of the deep network.
+
+However, there is an alternative perspective we can take to induce a similar smoothing effective. More specifically, we can use a smooth the maximum operation in \eqref{eq:region_assignment} with
+\begin{equation}\label{eq:max_curvature_tuning}
+    \left[\tilde{\mathbf{t}}_{\beta}^{(\ell)}\right]_i=\left(1-\beta^{(\ell)}\right)\log\left(\sum_{j=1}^{r^{(\ell)}}\exp\left(\frac{1}{1-\beta^{(\ell)}}\left(\left\langle\left[A^{(\ell)}\right]_{i,j,\cdot},\mathbf{z}^{(\ell-1)}\right\rangle\right)+\left[B^{(\ell)}\right]_{i,j}\right)\right).
+\end{equation}
+In this case, as $\beta^{(\ell)}$ goes from zero to one we manoeuvrer from the linear regime to the ReLU activation operator.
+
+\section{Curvature Tuning}
+
+Given a trained deep network, we can parametrise its behaviour with the parameter $\beta^{(\ell)}$ using \eqref{eq:vq_curvature_tuning} or \eqref{eq:max_curvature_tuning}. In particular, note that regardless of which parameterisation we utilise, changing the value of $\beta^{(\ell)}$ will cause the decision boundary to shift. For tuning the deep network, this behaviour is undesirable. However, using an average of these parameterisation negates these shifts.
+
+Curvature tuning utilises this and proposes to replace the ReLU activation operators of a trained deep network with $$\sigma_{\beta}(x)=\frac{\sigma_{\text{sig}}\left(\frac{\beta x}{1-\beta}\right)x}{2}+\frac{\log\left(1+\exp\left(\frac{x}{1-\beta}\right)\right)(1-\beta)}{2},$$and then tune the parameter $\beta$ using a forward passes on the deep network and a test set.
+
+\subsection{References}
+
+Chapter \ref{ch:finetuning} from \citet{huCurvatureTuningProvable2025}.

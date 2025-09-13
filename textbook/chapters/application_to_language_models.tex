@@ -1,0 +1,62 @@
+\section{Introduction}
+
+Language models commonly employ some form of transformer architecture, thus in this chapter we'll be considering these types of models. Even though some language model components employ smooth activation operators, their multi-layer perceptron components can be configured with piecewise affine activation operators, and thus are conducive to a spline orientated investigations. We use this perspective to understand how different aspects of the model's output relates to the underlying geometry of the model.
+
+\section{The Architecture}\label{sec:architecture}
+
+The $\ell^\text{th}$ transformer block is configured to receive as input as collection of token embeddings $\mathbf{Z}^{(\ell-1)}\in\mathbb{R}^{T\times d^{(\ell-1)}}$ and generate a similarly structure set of token embeddings $\mathbf{Z}^{(\ell)}\in\mathbb{R}^{T\times d^{(\ell)}}$. More specifically, the transformer block uses $H$ attention mechanisms on the input, which it then combines using a multi-layer perception. This is then added to the residual stream of the model to generate the required embeddings. Namely, 
+\begin{equation}\label{eq:transfomer_layer}
+    \begin{cases}\mathsf{HEAD}_h^{(\ell)}\left(\mathbf{Z}^{(\ell-1)}\right):=\mathrm{softmax}_{\text{causal}}\left(\mathbf{Z}^{(\ell-1)}Q_h^{(\ell)}\left(\mathbf{Z}^{(\ell-1)}K_h^{(\ell)}\right)^\top\right)\mathbf{Z}^{(\ell-1)}V_h^{(\ell)}&h=1,\dots,H\\\mathsf{MHA}^{(\ell)}\left(\mathbf{Z}^{(\ell-1)}\right):=\sum_{h=1}^H\mathsf{HEAD}_h^{(\ell)}\left(\mathbf{Z}^{(\ell-1)}\right)O_h^{(\ell)}\\\mathsf{LAYER}^{(\ell)}\left(\mathbf{Z}^{(\ell-1)}\right):=\mathsf{MLP}^{(\ell)}\left(\mathsf{LayerNorm}^{(\ell)}\left(\mathsf{MHA}^{(\ell)}\left(\mathbf{Z}^{(\ell-1)}\right)+\mathbf{Z}^{(\ell-1)}\right)\right)+\mathbf{Z}^{(\ell-1)}.\end{cases}
+\end{equation}
+We explicitly highlight the attention mechanism of the heads of the transformer block with\footnote{The causal subscript reflects the fact that the attention mechanism implements masking.}$$\mathsf{Attn}_h^{(\ell)}\left(\mathbf{Z}^{(\ell-1)}\right):=\mathrm{softmax}_{\text{causal}}\left(\mathbf{Z}^{(\ell-1)}Q_h^{(\ell)}\left(\mathbf{Z}^{(\ell-1)}K_h^{(\ell)}\right)^\top\right).$$For an input $\mathbf{X}\in\mathbb{R}^{T\times d}$ of token embeddings, the language model provides a similarly structure output of token embeddings $\mathbf{Y}\in\mathbb{R}^{T\times d^{(L)}}$ by composing $L$ transformer layers,\footnote{Strictly speaking the language model also involves encoder and decoder blocks to transform the tokens into embeddings and embeddings into token, however, we omit those here for simplicity.} $$\mathsf{LLM}\left(\mathbf{X}\right)=\left(\mathsf{Layer}^{(L)}\circ\dots\circ\mathsf{Layer}^{(1)}\right)(\mathbf{X}).$$
+
+\section{The Geometry of Attention}\label{sec:geometry_of_attention}
+
+\begin{lemma}\label{lem:geometry_attention}
+    The $i^\text{th}$ row of $\mathsf{Head}_h^{(\ell)}\left(\mathbf{Z}^{(\ell-1)}\right)$ lies within the convex hull $$\mathrm{conv}\left(\left\{\left(V_h^{(\ell)}\right)^\top\left[\mathbf{Z}^{(\ell-1)}\right]_{j,\cdot}:j=1,\dots,i\right\}\right),$$and is of effective dimension at most $$\left\vert\left\{\left[\mathsf{Attn}_h^{(\ell)}\left(\mathbf{Z}^{(\ell-1)}\right)\right]_{i,j}>0:j=1,\dots,i\right\}\right\vert.$$
+\end{lemma}
+
+\begin{tproof}
+    Since the causal mask hides the tokens $i+1,\dots,T$ from the attention mechanism at token $i$, and the softmax provides attention values normalised to a probability distribution, it follows that $$\left[\mathsf{Head}_h^{(\ell)}\left(\mathbf{Z}^{(\ell-1)}\right)\right]_{i,\cdot}=\sum_{j=1}^i\alpha_i\left[\mathbf{Z}^{(\ell-1)}V_h^{(\ell)}\right]_{j,\cdot},$$where $\alpha_j\geq0$ for $j=1,\dots,i$ with $\sum_{j=1,\dots,i}\alpha_j=1$. Hence, $$\left[\mathsf{Head}_h^{(\ell)}\left(\mathbf{Z}^{(\ell-1)}\right)\right]_{i,\cdot}\in\mathrm{conv}\left(\left\{\left(V_h^{(\ell)}\right)^\top\left[\mathbf{Z}^{(\ell-1)}\right]_{j,\cdot}:j=1,\dots,i\right\}\right).$$More specifically, the effective dimension is at most the number of non-zero $\alpha_j$s for $j=1,\dots,i$, thus the effective dimension is at most $$\left\vert\left\{\left[\mathsf{Attn}_h^{(\ell)}\left(\mathbf{Z}^{(\ell-1)}\right)\right]_{i,j}>0:j=1,\dots,i\right\}\right\vert.$$
+\end{tproof}
+
+Let $$\mathcal{A}_h^{(\ell)}(i):=\mathrm{conv}\left(\left\{\left(V_h^{(\ell)}O_h^{(\ell)}\right)^\top\left[\mathbf{Z}^{(\ell-1)}\right]_{j,\cdot}:j=1,\dots,i\right\}\right),$$namely the convex hull of the head mapping onto $O^{(\ell)}$.
+
+\begin{theorem}\label{thm:geometry_multi_head_attention}
+    The $i^\text{th}$ row of $\mathsf{MHA}^{(\ell)}\left(\mathbf{Z}^{(\ell-1)}\right)$ lies within the Minkowski sum\footnote{For sets $\mathcal{A}$ and $\mathcal{B}$, their Minkowski sum $\mathcal{A}+\mathcal{B}$ is $\left\{a+b:\text{for all }(a,b)\in\mathcal{A}\times\mathcal{B}\right\}$.}$\mathcal{A}_1^{(\ell)}(i)+\dots+\mathcal{A}_H^{(\ell)}(i)$, and is of effective dimension at most
+    \begin{equation}\label{eq:mha_id}
+        \sum_{h=1}^H\left\vert\left[\mathsf{Attn}_h^{(\ell)}\left(\mathbf{Z}^{(\ell-1)}\right)\right]_{i,j}>0:j=1,\dots,i\right\vert.
+    \end{equation}
+\end{theorem}
+
+\begin{tproof}
+    As noted in the proof of Lemma \ref{lem:geometry_attention}, we have $$\left[\mathsf{MHA}^{(\ell)}\left(\mathbf{Z}^{(\ell-1)}\right)\right]_{i,\cdot}=\sum_{h=1}^H\alpha^{(h)}_i\left[\mathbf{Z}^{(\ell-1)}V_h^{(\ell)}O_h^{(\ell)}\right],$$where $\alpha^{(h)}_j\geq0$ for $j=1,\dots,i$ and $\sum_{j=1,\dots,i}\alpha^{(h)}_j=1$ for each $h=1,\dots,H$. Thus, it follows that $$\left[\mathsf{MHA}^{(\ell)}\left(\mathbf{Z}^{(\ell-1)}\right)\right]_{i,\cdot}\in\mathcal{A}_1^{(\ell)}(i)+\dots+\mathcal{A}_H^{(\ell)}(i),$$with the required effective dimension due to similar arguments to those made in Lemma \ref{lem:geometry_attention}.
+\end{tproof}
+
+\begin{remark}
+    From Lemma \ref{lem:geometry_attention} and Theorem \ref{thm:geometry_multi_head_attention} we observe that the effective dimension of the multi-head output for each token is upper bounded by the number of tokens proceeding multiplied by the number of heads being used. Moreover, the effective dimension of a token embedding increases with the number of non-zero attention it has with its proceeding tokens.
+\end{remark}
+
+The intrinsic dimension of an embedding space refers to the minimum number of parameters required for its characterisation whilst maintaining its structure. Theorem \ref{thm:geometry_multi_head_attention} offers a way to estimate the intrinsic dimension of the embeddings of tokens from multi-head mechanisms, namely, $$\mathrm{ID}^{(\ell)}_{\epsilon}(i):=\left\vert\left\{\left[\mathsf{Attn}_h^{(\ell)}\left(\mathbf{Z}^{(\ell-1)}\right)\right]_{i,j}>\epsilon:j=1,\dots,i\right\}\right\vert.$$That is, an estimate for the intrinsic dimension is taken to be the number of tokens that influential, beyond a threshold $\epsilon$, for the $i^\text{th}$ embedding.
+
+\section{Expressivity}\label{sec:expressivity}
+
+An important observation to make regarding the multi-layer perceptron component of the transformer layer presented in \eqref{eq:transfomer_layer}, is that it is applied independently on each row $\mathbf{Z}^{(\ell-1)}$. That is, $$\mathsf{MLP}^{(\ell)}\left(\mathbf{Z}^{(\ell-1)}\right)=\left(\mathsf{MLP}^{(\ell)}\left(\left[\mathbf{Z}^{(\ell-1)}\right]_{1,\cdot}\right),\dots,\mathsf{MLP}^{(\ell)}\left(\left[\mathbf{Z}^{(\ell-1)}\right]_{T,\cdot}\right)\right)^\top.$$Supposing that the multi-layer perceptron component implements piecewise-affine operators, it can be considered as a continuous piecewise affine spline, namely $$\mathsf{MLP}^{(\ell)}\left(\left[\mathbf{Z}^{(\ell-1)}\right]_{j,\cdot}\right)=\sum_{\omega\in\Omega^{(\ell)}}\left(A_{\omega}^{(\ell)}\left[\mathbf{Z}^{(\ell-1)}\right]_{j,\cdot}+b^{(\ell)}_{\omega}\right)\mathbf{1}_{\left\{\left[\mathbf{Z}^{(\ell-1)}\right]_{j,\cdot}\in\omega\right\}},$$where $\Omega^{(\ell)}$ is a partition of $\mathbb{R}^{d^{(\ell-1)}}$. The additional layer normalisation and skip-connection present in \eqref{eq:transfomer_layer} does not affect this interpretation for our analysis, since partition statistics such as the number of regions, determining whether points are in the same region, or the identification of which region an input belongs to, remains unchanged with these added operations.
+
+Since the regions of $\Omega^{(\ell)}$ provide a measure of expressivity, with this perspective, we can understand the expressivity of these multi-layer perceptron blocks.
+
+\begin{proposition}\label{prop:expressivity_mlp_transformer}
+    The expressivity of a transformer layer's multi-layer perceptron that can be reached by the multi-head attention's output, grows exponentially with the multi-head attention's intrinsic dimension as measured by \eqref{eq:mha_id}.
+\end{proposition}
+
+\begin{tproof}
+    This follows from Theorem \ref{thm:geometry_multi_head_attention} and observations from Section \ref{sec:input_space_partitioning} which identify the exponential relationship between regions and dimensions.
+\end{tproof}
+
+Proposition \ref{prop:expressivity_mlp_transformer} provides a necessary but not sufficient condition for chain-of-thought reasoning or in-context learning.
+
+These insights can be used to derive first order geometric features to characterise prompts to language models to understand their toxicity \citet{balestrieroCharacterizingLargeLanguage2023}, or to improve their reasoning abilities \citet{cosentinoReasoningLargeLanguage2024}.
+
+\section{References}
+
+Chapter \ref{ch:application_llm} from \citet{balestrieroCharacterizingLargeLanguage2023}.

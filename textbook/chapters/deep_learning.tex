@@ -1,0 +1,140 @@
+\section{Introduction}
+
+Deep learning investigates the utilisation of deep networks to represent distributions on an input domain. Using a collection of training data and iterative learning algorithms, a deep network can be tuned to functional represent the distribution of the training data on its domain. Deep networks consist of a series of affine transformations separated by non-linear functions. Despite their architectural simplicity, deep networks are very expressive, representing a large function class. In this chapter we introduce the structure of deep networks and the paradigm they operate. We introduce some common components of deep networks and how they are combined to form expressive architectures.
+
+\section{Deep Networks}\label{sec:deep_networks}
+
+A deep network parameterised by parameters $\theta$, is an operator $f_{\theta}:\mathbb{R}^d\to\mathbb{R}^{d^{(L)}}$ constructed as a composition of layers $$f_{\theta}=\left(f^{(L)}_{\theta^{(L)}}\circ\dots\circ f^{(1)}_{\theta^{(1)}}\right).$$In this instance the deep network has $L$ layers, where layer $\ell$ is parametersied by the set of parameters $\theta^{(\ell)}\subseteq\theta$.
+
+A deep network can be thought of as taking a signal $\mathbf{x}\in\mathbb{R}^d$ and predicting an output $\mathbf{y}\in\mathbb{R}^{d^{(L)}}$; with each intermediary layer extracting \emph{features} of the signal that are pertinent to making the prediction.
+
+More specifically, the operator at layer $\ell$ takes as input $\mathbf{z}^{(\ell-1)}(\mathbf{x})\in\mathbb{R}^{d^{(\ell-1)}}$ and generates a feature map $\mathbf{z}^{(\ell)}(\mathbf{x})$. 
+\begin{itemize}
+    \item Either, one can think of $\mathbf{z}^{(\ell)}$ as a prediction of the features in the signal $\mathbf{x}$, since $$\mathbf{z}^{(\ell)}(\mathbf{x})=\left(f^{(\ell)}_{{\theta}^{(\ell)}}\circ\dots\circ f^{(1)}_{\theta^{{(1)}}}\right)(\mathbf{x}).$$
+    \item Or, one can think of $\mathbf{z}^{(\ell)}$ as a signal that is inputted into the deep network $\left(f^{(L)}_{{\theta}^{(L)}}\circ\dots\circ f^{(\ell+1)}_{\theta^{{(\ell+1)}}}\right)$ to form the prediction $\mathbf{y}$.
+\end{itemize}
+For clarity, we let $\mathbf{z}^{(0)}:=\mathbf{x}$ and $d^{(0)}=d$.
+
+\section{Paradigm}
+
+The parameters $\theta$ of the deep network need to be learned so that its prediction is meaningful\footnote{For ease of exposition, we will consider the case of supervised learning.}.
+
+Typically a loss function $\mathcal{L}$ is used to quantitatively capture the error of the deep network's prediction. Since the the layers of the deep network are differentiable almost everywhere with respect to their parameters and inputs, we can use this error to optimise the parameters $\theta$ through a first-order optimization policy such as gradient descent.
+
+The exact form of the loss function is dependent on the task of focus and the type of data available.
+\begin{itemize}
+    \item For regression problems, we are typically represented with a set of data $\mathcal{D}=\left\{\left(\mathbf{x}_i,\mathbf{y}_i\right)\right\}_{i=1}^n$ and we are required to optimise $\theta$ such that $f_{\theta}\left(\mathbf{x}_i\right)\approx\mathbf{y}_i$. A commonly used loss function in this scenario is the mean squared error loss function $\mathcal{L}_{\text{MSE}}:\mathbb{R}^{d^{(L)}}\times\mathbb{R}^{d^{(L)}}\to\mathbb{R}_{\geq0}$ given by $$\mathcal{L}_{\text{MSE}}\left(\mathbf{y}_i,f_{\theta}\left(\mathbf{x}_i\right)\right)=\left\Vert\mathbf{y}_i-f_{\theta}\left(\mathbf{x}_i\right)\right\Vert_2^2.$$
+    \item For classification problems, we are typically presented with a set of data $\mathcal{D}=\left\{\left(\mathbf{x}_i,y_i\right)\right\}_{i=1}^n$ and we are required to optimise $\theta$ such that $\argmax\left(f_{\theta}\left(\mathbf{x}_i\right)\right)=y_i$. A commonly used loss function in this scenario is the cross entropy loss function $\mathcal{L}_{\text{CE}}:\mathbb{R}_{\geq0}\times\mathbb{R}^{d^{(L)}}\to\mathbb{R}_{\geq0}$ given by $$\mathcal{L}_{\text{CE}}\left(y_i,f_{\theta}\left(\mathbf{x}_i\right)\right)=-\left[f_{\theta}\left(\mathbf{x}_i\right)\right]_{y_i}+\log\left(\sum_{j=1}^{d^{(L)}}\exp\left(\left[f_{\theta}\left(\mathbf{x}_i\right)\right]_j\right)\right).$$
+\end{itemize}
+
+\section{Operators and Layers}\label{sec:operators_layesr}
+
+The form of the intermediary operators $f_{\theta^{(\ell)}}^{(\ell)}$ is dependent on the type of signals to be observed by the deep network, the computational constraints of the deep network, and prior knowledge of the features the deep network should extract.
+
+\subsection{Fully Connected Operator}
+
+A fully connected operator performs an affine transformation on the input signal by multiplying by a dense matrix $W^{(\ell)}_{\text{fc}}\in\mathbb{R}^{d^{(\ell)}\times d^{(\ell-1)}}$ and adding a bias vector $b_{\text{fc}}^{(\ell)}\in\mathbb{R}^{d^{(\ell)}}$. So that, $$f_{\text{fc}}^{(\ell)}\left(\mathbf{z}^{(\ell-1)}(\mathbf{x})\right)=W_{\text{fc}}^{(\ell)}\mathbf{z}^{(\ell-1)}(\mathbf{x})+b_{\text{fc}}^{(\ell)}.$$
+
+\subsection{Convolutional Operator}
+
+A convolutional operator deals with signals exhibiting channels. More specifically, we consider our input signal as a tensor $x$ rather than as a vector $\mathbf{x}$. We contextualise this by thinking of $x$ as an image, by supposing that $x$ has $C^{(0)}$ channels across $\left(I^{(0)}\times J^{(0)}\right)$ pixels. The $\ell^{\text{th}}$ feature map then contains $C^{(\ell)}$ channels across $\left(I^{(\ell)}\times J^{(\ell)}\right)$ pixels. We can form a vector representation $\mathbf{x}$ of $x$ by flattening its dimensions, and we can retrieve the $i^{\text{th}}$ dimension of this representation with $[\mathbf{x}]_i$.
+
+A convolution operator performs a constrained affine transformation on the input signal by multiplying by a multichannel block-circulant convolution matrix $\mathbf{C}_{\text{conv}}^{(\ell)}\in\mathbb{R}^{d^{(\ell)}\times d^{(\ell-1)}}$ and adding a bias vector $b_{\text{conv}}^{(\ell)}\in\mathbb{R}^{d^{(\ell)}}$. So that, $$f^{(\ell)}_{\text{conv}}\left(\mathbf{z}^{(\ell-1)}(\mathbf{x})\right)=\mathbf{C}_{\text{conv}}^{(\ell)}\mathbf{z}^{(\ell-1)}(\mathbf{x})+b_{\text{conv}}.$$
+
+\subsection{Activation Operators}
+
+Activation operators apply a non-linear function $\sigma$ to its input either element-wise or across the whole input. 
+
+In the element-wise case we have $\sigma:\mathbb{R}\to\mathbb{R}$, so that $$\left[f_{\sigma}^{(\ell)}\left(\mathbf{z}^{(\ell-1)}(\mathbf{x})\right)\right]_i=\sigma\left(\left[\mathbf{z}^{(\ell-1)}(\mathbf{x})\right]\right)$$for $i=1,\dots,d^{(\ell)}$.
+
+\begin{example}
+    Commonly used activation functions include the following.
+    \begin{enumerate}
+        \item The rectified linear unit (ReLU), given by $$\sigma_{\text{ReLU}}(u)=\max(u,0).$$
+        \item The leaky rectified linear unit (leaky ReLU), given by $$\sigma_{\text{LReLU}}(u)=\max(\eta u,u)$$for some $\eta>0$.
+        \item The absolute value, given by $$\sigma_{\text{abs}}(u)=\vert u\vert.$$
+        \item The sigmoid, given by $$\sigma_{\text{sig}}(u)=\frac{1}{1+e^{-u}}.$$
+        \item The swish, given by $$\sigma_{\text{swish}}(u;\eta)=\sigma_{\text{sig}}\left(\eta u\right)u$$for $0\leq\eta\leq1$.
+        \item The hyperbolic tangent, given by $$\sigma_{\text{tanh}}(u)=2\sigma_{\text{sig}}(2u)-1.$$
+    \end{enumerate}
+    Observe how examples 1, 2, and 3 are piecewise affine and convex, whereas 4 and 5 have neither of these properties.
+\end{example}
+
+Activation operators acting on the whole input have $\sigma:\mathbb{R}^{d^{(\ell-1)}}\to\mathbb{R}^{d^{(\ell)}}$, so that $$f^{(\ell)}_{\sigma}\left(\mathbf{z}^{(\ell-1)}(\mathbf{x})\right)=\sigma\left(\mathbf{z}^{(\ell-1)}(\mathbf{x})\right).$$
+
+\begin{example}
+    \begin{enumerate}
+        \item[]
+        \item The softmax non-linearity has $$\sigma_{\text{softmax}}\left(\mathbf{x}\right)=\begin{pmatrix}\frac{\exp\left(\left[\mathbf{x}\right]_1\right)}{\sum_{j=1}^{d^{(\ell)}}\exp\left(\left[\mathbf{x}\right]_j\right)}\\\vdots\\\frac{\exp\left(\left[\mathbf{x}\right]_{d^{(\ell)}}\right)}{\sum_{j=1}^{d^{(\ell)}}\exp\left(\left[\mathbf{x}\right]_j\right)}\end{pmatrix}.$$
+        \item The maxout non-linearity has $$\sigma_{\text{maxout}}\left(\mathbf{x}\right)=\max_{j=1,\dots,d^{(\ell)}}\mathbf{1}.$$
+    \end{enumerate}
+\end{example}
+
+In subsequent analyses we will consider activation operators applying the non-linearity element-wise. \textcolor{Red}{could we rectify this with further analyses.}
+
+\subsection{Pooling Operators}
+
+A pooling operator subsamples an input to reduce its dimensionality. Pooling operators enact a policy $\rho$ over $d^{(\ell)}$ pooling regions given by a collection of indices $\left\{\mathcal{R}_i^{(\ell)}\right\}_{i=1}^{d^{(\ell)}}$.\footnote{It is necessary that $\left\vert\mathcal{R}_i^{(\ell)}\right\vert=\left\vert\mathcal{R}^{(\ell)}_{i^\prime}\right\vert$ for each $i,i^\prime\left\{1,\dots,d^{(\ell)}\right\}$.}
+
+\paragraph{Max-Pooling}
+
+Max-pooling has policy $\rho_{\text{max}}$ so that $$\left[f_{\rho_{\text{max}}}^{(\ell)}\left(\mathbf{z}^{(\ell-1)}(\mathbf{x})\right)\right]_i=\max_{t\in\mathcal{R}_i^{(\ell)}}\left[\mathbf{z}^{(\ell-1)}(\mathbf{x})\right]_t$$for $i=1,\dots,d^{(\ell)}$.
+
+\paragraph{Mean-Pooling}
+
+Mean-pooling has policy $\rho_{\text{mean}}$ so that $$\left[f_{\rho_{\text{mean}}}^{(\ell)}\left(\mathbf{z}^{(\ell-1)}(\mathbf{x})\right)\right]_i=\frac{1}{\left\vert\mathcal{R}^{(\ell)}_i\right\vert}\sum_{t\in\mathcal{R}^{(\ell)}_i}\left[\mathbf{z}^{(\ell-1)}(\mathbf{x})\right]_t$$for $i=1,\dots,d^{(\ell)}$.
+
+\paragraph{Local-Importance-Pooling}
+
+Local-importance-pooling \citep{gaoLIPLocalImportanceBased2023} has policy $\rho_{g}$ so that $$\left[f^{(\ell)}_{\rho_{g}}\left(\mathbf{z}^{(\ell-1)}(\mathbf{x})\right)\right]_i=\frac{\sum_{j\in\mathcal{R}_i^{(\ell)}}g\left(\left[\mathbf{z}^{(\ell-1)}(\mathbf{x})\right]_j\right)\left[\mathbf{z}^{(\ell-1)}(\mathbf{x})\right]_j}{\sum_{t\in\mathcal{R}^{(\ell)}_i}g\left(\left[\mathbf{z}^{(\ell-1)}(\mathbf{x})\right]_t\right)}$$
+
+\subsection{Normalisation Operators}
+
+Let $\ell$ be a deep network layer consisting of an affine transformation and activation operator $\sigma_{\text{act}}$, say $$\mathbf{z}^{(\ell)}=\sigma_{\text{act}}\left(W_{\text{fc}}^{(\ell)}\mathbf{z}^{(\ell-1)}+b^{(\ell)}_{\text{fc}}\right).$$
+
+Normalisation operators utilise parameters $\mu^{(\ell)}$, $\sigma^{(\ell)}$, $\beta^{(\ell)}$ and $\gamma^{(\ell)}$ to augment layer $\ell$'s mapping as $$\left[\mathbf{z}^{(\ell)}\right]_i=\sigma_{\text{act}}\left(\frac{\left\langle\left[W_{\text{fc}}^{(\ell)}\right]_{i,\cdot},\mathbf{z}^{(\ell-1)}\right\rangle-\left[\mu^{(\ell)}\right]_i}{\left[\sigma^{(\ell)}\right]_i}\left[\gamma^{(\ell)}\right]_i+\left[\beta^{(\ell)}\right]_i\right)$$for $i=1,\dots,d^{(\ell)}$.
+
+Typically, $\mu^{(\ell)}$ and $\sigma^{(\ell)}$ are computed for the deep network,\footnote{The nature of the computations may vary depending on whether the deep network is being trained or tested.} whereas $\gamma^{(\ell)}$ and $\beta^{(\ell)}$ are learned. For simplicity, we set $\gamma^{(\ell)}=\mathbf{1}$ and $\beta^{(\ell)}=\mathbf{0}$. The latter assumption can be empirically shown to have little effect on the performance of the deep network, we justify the former assumption theoretically with Proposition \ref{prop:gamma_bn_zero}.
+
+\begin{proposition}\label{prop:gamma_bn_zero}
+    The batch normalisation parameter $\gamma^{(\ell)}\neq\mathbf{0}$ does not impact the expressivity of the deep network layer.
+\end{proposition}
+
+\begin{tproof}
+    We proceed by showing that $\gamma^{(\ell)}$ can be absorbed into the parameters of $W^{(\ell+1)}$ and $\beta^{(\ell)}$. Observe that
+    \begin{align*}
+        \left[\mathbf{z}^{(\ell+1)}\right]_i&=\sigma_{\text{act}}\left(\frac{\sum_{j=1}^{d^{(\ell)}}\left[W^{(\ell+1)}\right]_{i,j}\sigma_{\text{act}}\left(\frac{\left\langle\left[W^{(\ell)}\right]_{j,\cdot},\mathbf{z}^{(\ell)}\right\rangle-\left[\mu^{(\ell)}\right]_j}{\left[\sigma^{(\ell)}\right]_j}\left[\gamma^{(\ell)}\right]_j+\left[\beta^{(\ell)}\right]_j\right)-\left[\mu^{(\ell+1)}\right]_i}{\left[\sigma^{(\ell+1)}\right]_i}\left[\gamma^{(\ell+1)}\right]_i+\left[\beta^{(\ell+1)}\right]_i\right)\\&=\sigma_{\text{act}}\left(\frac{\sum_{j=1}^{d^{(\ell)}}\left[\gamma^{(\ell)}\right]_j\left[W^{(\ell+1)}\right]_{i,j}\sigma_{\text{act}}\left(\frac{\left\langle\left[W^{(\ell)}\right]_{j,\cdot},\mathbf{z}^{(\ell)}\right\rangle-\left[\mu^{(\ell)}\right]_j}{\left[\sigma^{(\ell)}\right]_j}+\frac{\left[\beta^{(\ell)}\right]_j}{\left[\gamma^{(\ell)}\right]_j}\right)-\left[\mu^{(\ell+1)}\right]_i}{\left[\sigma^{(\ell+1)}\right]_i}\left[\gamma^{(\ell+1)}\right]_i+\left[\beta^{(\ell+1)}\right]_i\right)\\&=\sigma_{\text{act}}\left(\frac{\sum_{j=1}^{d^{(\ell)}}\left[\tilde{W}^{(\ell+1)}\right]_{i,j}\sigma_{\text{act}}\left(\frac{\left\langle\left[W^{(\ell)}\right]_{j,\cdot},\mathbf{z}^{(\ell)}\right\rangle-\left[\mu^{(\ell)}\right]_j}{\left[\sigma^{(\ell)}\right]_j}+\left[\tilde{\beta}^{(\ell)}\right]_j\right)-\left[\mu^{(\ell+1)}\right]_i}{\left[\sigma^{(\ell+1)}\right]_i}\left[\gamma^{(\ell+1)}\right]_i+\left[\beta^{(\ell+1)}\right]_i\right).
+    \end{align*}
+\end{tproof}
+
+\paragraph{Batch Normalisation}
+
+Let $\mathcal{X}$ be the training set, and let $\mathcal{B}\subseteq\mathcal{X}$. Let $\mathcal{X}^{(\ell)}$ be the features maps $\mathbf{z}^{(\ell)}$ formed at layer $\ell$ from the inputs $\mathbf{x}\in\mathcal{X}$, and similarly for $\mathcal{B}^{(\ell)}$. So that, during training, at mini-batch $\mathcal{B}$ we set 
+\begin{equation}\label{eq:bn_parameters}
+    \begin{cases}\mu^{(\ell)}=\frac{1}{\left\vert\mathcal{B}^{(\ell)}\right\vert}\sum_{\mathbf{z}^{(\ell)}\in\mathcal{B}^{(\ell)}}W_{\text{fc}}^{(\ell)}\mathbf{z}^{(\ell)}\\\sigma^{(\ell)}=\sqrt{\frac{1}{\left\vert\mathcal{B}^{(\ell)}\right\vert}\sum_{\mathbf{z}^{(\ell)}\in\mathcal{B}^{(\ell)}}\left(W_{\text{fc}}^{(\ell)}\mathbf{z}^{(\ell)}-\mu^{(\ell)}\right)^2}.\end{cases}
+\end{equation}
+At test time, we compute the parameters $\bar{\mu}^{(\ell)}$ and $\bar{\sigma}^{(\ell)}$ by replacing $\mathcal{B}^{(\ell)}$ in \eqref{eq:bn_parameters} with $\mathcal{X}^{(\ell)}$.
+
+\paragraph{Layer Normalisation}
+
+During training a testing, we set $$\begin{cases}\mu^{(\ell)}=\frac{1}{d^{(\ell)}}\sum_{i=1}^{d^{(\ell)}}\left[W_{\text{fc}}^{(\ell)}\mathbf{z}^{(\ell)}\right]_i\\\sigma^{(\ell)}=\sqrt{\frac{1}{d^{(\ell)}}\sum_{i=1}^{d^{(\ell)}}\left(\left[W_{\text{fc}}^{(\ell)}\mathbf{z}^{(\ell)}\right]_i-\mu^{(\ell)}\right)^2}.\end{cases}$$
+
+\subsection{Skip Connection Operator}
+
+A skip-connection operator performs an affine transformation on the input signal of an operator $f_{\theta^{(\ell)}}^{(\ell)}$ with the output of the same operator. So that, $$f_{\text{skip}}^{(\ell)}\left(\mathbf{z}^{(\ell-1)}(\mathbf{x});f_{\theta^{(\ell)}}^{(\ell)}\right)=W_{\text{skip}}^{(\ell)}\mathbf{z}^{(\ell-1)}(\mathbf{x})+f_{\theta^{(\ell)}}^{(\ell)}\left(\mathbf{z}^{(\ell-1)}(\mathbf{x})\right)+b_{\text{skip}}^{(\ell)}.$$The skip connection can also be cast as a convolution between the input signal and the output signal of the operator by replacing the variables.
+
+\subsection{Recurrent Connection Operator}
+
+A recurrent operator acts on a time-series by performing a transformation on the input, its output at the previous time-step, as $$f_{\text{rec}}^{(1,t)}(\mathbf{x})=W_{\text{in}}^{(1)}x^t+W_{\text{rec}}^{(1)}\mathbf{z}^{(1,t-1)}(\mathbf{x})+b^{(1)},$$or when there is a previous layer, as $$f_{\text{rec}}^{(\ell,t)}(\mathbf{x})=W_{\text{in}}^{(\ell)}x^t+W_{\text{up}}^{(\ell)}\mathbf{z}^{(\ell-1,t)}(\mathbf{x})+W_{\text{rec}}^{(\ell)}\mathbf{z}^{(\ell,t-1)}(\mathbf{x})+b^{(\ell)}.$$
+
+\subsection{Output Operator}
+
+The output operator forms the output of the deep network by taking the prediction $\mathbf{y}\in\mathbb{R}^{d^{(L)}}$ and passing it through a non-linearity.
+
+\subsection{Layer}\label{subsec:layer}
+
+A layer of a deep network refers to an activation or pooling operator composed with an affine operator\footnote{Affine operators include fully connected operators, convolution operators, skip connection operators and recurrent connection operators. Typically, we will only consider piecewise affine activation operators, such as ReLU, leaky ReLU and absolute value.}. Typically, $f^{(\ell)}$ will depict a layer, so that a deep network is a composition of layers.
+
+\section{References}
+
+Chapter \ref{ch:deep_learning} from \citet{balestrieroMadMaxAffine2018}.

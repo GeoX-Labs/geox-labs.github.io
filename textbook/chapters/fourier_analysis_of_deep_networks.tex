@@ -1,0 +1,24 @@
+\section{Introduction}
+
+
+\section{The Structure of Deep Networks}
+
+\begin{lemma}
+    Suppose $f$ is a deep ReLU network. Given $L-1$ binary vectors $s^{(1)},\dots,s^{(L-1)}$ with $s^{(\ell)}\in\{-1,1\}^{d^{(\ell)}}$, let $f_{s^{(\ell)}}^{(\ell)}:\mathbb{R}^{d^{(\ell-1)}}\to\mathbb{R}^{d^{(\ell)}}$ be given by $$\left[f_{s^{(\ell)}}^{(\ell)}(\mathbf{z})\right]_i=\begin{cases}\left[f^{(\ell)}(\mathbf{z})\right]_i&\left[s^{(\ell)}\right]_i=1\\0&\text{otherwise.}\end{cases}$$Then$$f(\mathbf{x})=\sum_{s^{(1)},\dots,s^{(L-1)}}\left(f^{(L)}\circ f^{(L-1)}_{s^{(L-1)}}\circ\dots\circ f^{(1)}_{s^{(1)}}\right)(\mathbf{x})\mathbf{1}_{\{\mathbf{x}\in\omega(\mathbf{s})\}},$$where $\omega(\mathbf{s})$ is the solution set of the inequalities $$\begin{cases}\left[f^{(1)}(\mathbf{x})\right]_i\left[s^{(1)}\right]_i\geq0&i=1,\dots,d^{(1)}\\\left[\left(f^{(2)}\circ f^{(1)}_{s^{(1)}}\right)(\mathbf{x})\right]_i\left[s^{(2)}\right]_i\geq0&i=1,\dots,d^{(2)}\\\vdots\\\left[\left(f^{(L-1)}\circ f^{(L-2)}_{s^{(L-2)}}\dots\circ f^{(1)}_{s^{(1)}}\right)(\mathbf{x})\right]_i\left[s^{(L-1)}\right]_i\geq0&i=1,\dots,d^{(L-1)}.\end{cases}$$
+\end{lemma}
+
+\begin{remark}
+    For the mapping between layers $f^{(\ell)}:\mathbb{R}^{d^{(\ell-1)}}\to\mathbb{R}^{d^{(\ell)}}$, one can similarly express it as $$f^{(\ell)}\left(\mathbf{z}^{(\ell-1)}\right)=\sum_{s^{(\ell)}\in\{-1,1\}^{d^{(\ell)}}}f^{(\ell)}_{s^{(\ell)}}\left(\mathbf{z}^{(\ell-1)}\right)\mathbf{1}_{\left\{\mathbf{z}^{(\ell-1)}\in\omega\left(s^{(\ell)}\right)\right\}},$$where $$\omega\left(s^{(\ell)}\right)=\bigcap_{i=1}^{d^{(\ell)}}\left\{\mathbf{z}^{(\ell-1)}\in\mathbb{R}^{d^{(\ell-1)}}:\left[f^{(\ell)}\left(\mathbf{z}^{(\ell-1)}\right)\right]_i\left[s^{(\ell)}\right]_i\geq0\right\}.$$
+    \textcolor{Red}{the equality here is flipped compared to later on...} Equivalently, one can write $$f^{(\ell)}\left(\mathbf{z}^{(\ell-1)}\right)=\sum_{s^{(\ell)}\in\{-1,1\}^{d^{(\ell)}}}\left(W^{(\ell)}_{s^{(\ell)}}\mathbf{z}^{(\ell-1)}+b^{(\ell)}_{s^{(\ell)}}\right)\mathbf{1}_{\left\{\mathbf{z}^{(\ell-1)}\in\omega\left(s^{(\ell)}\right)\right\}},$$where $W^{(\ell)}_{s^{(\ell)}}$ is obtained by zeroing the $j^{\text{th}}$ of $W^{(\ell)}$ if $\left[s^{(\ell)}\right]_j$ is zero. \textcolor{Red}{W is replaced by A in subsequent sections}. More generally, $$f(\mathbf{x})=\sum_{\mathbf{s}=\{s^{(1)},\dots,s^{(L)}\}}\left(W_{\mathbf{s}}^{(L)}\mathbf{x}+b_{\mathbf{s}}^{(L)}\right)\mathbf{1}_{\{\mathbf{x}\in\omega(\mathbf{s})\}},$$where $$W_{\mathbf{s}}=\prod_{\ell=1}^LW_{s^{(\ell)}}^{(\ell)}$$and$$b_{\mathbf{s}}=b^{(L)}_{s^{(L)}}+\sum_{i=1}^{L-1}\left(\prod_{j=i+1}^{L}W^{(j)}_{s^{(j)}}\right)b^{(i)}_{s^{(i)}}.$$
+    \textcolor{Red}{Note the similarity to a lemma in sec 11.}
+\end{remark}
+
+Note how $\mathbf{x}\in\omega\left(s^{(\ell)}\right)$ if and only if $\left[s^{(\ell)}\right]_i=\mathrm{sign}\left(f^{(\ell)}\circ\mathbf{z}^{(\ell-1)}(\mathbf{x})\right)$.\textcolor{Red}{this probably needs justification} Using the notation $\mathbf{s}(\mathbf{x})$ as the set of vectors $s^{(1)},\dots,s^{(L)}$ constructed in this way, we have $$f(\mathbf{x})=W_{\mathbf{s}(\mathbf{x})}\mathbf{x}+b_{\mathbf{s}(\mathbf{x})}=:f_{\mathbf{s}(\mathbf{x})}(\mathbf{x}).$$
+
+\subsection{The Fourier Spectrum of Deep Networks}
+
+
+
+\section{References}
+
+Chapter \ref{ch:fourier_analysis_dn} from \citet{rahamanSpectralBiasNeural2018}.

@@ -1,0 +1,51 @@
+\section{Introduction}
+
+In general, considering the functional geometry of deep networks is computational intractable due to the combinatorial nature of the regions, and the necessity of solving large linear programs to determine their exact structure. Moreover, modern deep networks operate in high-dimensional spaces, and thus the curse of dimensionality becomes quickly evident. However, there are methods to circumvent these restrictions when focusing on computing specific statistics. Similarly, one can develop approximate heuristics that can provide valuable information on the underlying structure of the deep network's geometry.
+
+\section{Jacobian-Vector Products}\label{sec:jvp}
+
+For an operator $f:\mathbb{R}^d\to\mathbb{R}^k$, the right-operation at $\mathbf{x}\in\mathbb{R}^d$ denoted $\mathrm{Rop}_{(f,\mathbf{x})}:\mathbb{R}^d\to\mathbb{R}^k$ is given by $$\mathrm{Rop}_{(f,\mathbf{x})}(\mathbf{u}):=J_f(\mathbf{x})\mathbf{u},$$where $J_f(\mathbf{x})$ is the Jacobian of $f$ evaluated at $\mathbf{x}$.\footnote{Throughout, we will assume that $f$ is differentiable at $\mathbf{x}$.}Explicitly, $$J_f(\mathbf{x})=\begin{pmatrix}\frac{\partial[f]_1}{\partial[\mathbf{x}]_1}(\mathbf{x})&\dots&\frac{\partial[f]_1}{\partial[\mathbf{x}]_d}(\mathbf{x})\\\vdots&&\vdots\\\frac{\partial[f]_k}{\partial[\mathbf{x}]_1}(\mathbf{x})&\dots&\frac{\partial[f]_k}{\partial[\mathbf{x}]_d}(\mathbf{x})\end{pmatrix},$$however, with regards to computing Jacobian-vector products it is not necessary to determine this.
+
+Another common Jacobian-vector product is the left-operation at $\mathbf{x}\in\mathbb{R}^d$ denoted $\mathrm{Lop}_{(f,\mathbf{x})}:\mathbb{R}^d\to\mathbb{R}^k$ and given by $$\mathrm{Lop}_{(f,\mathbf{x})}(\mathbf{u}):=\mathbf{u}^\top J_f(\mathbf{x}).$$
+
+\begin{proposition}\label{prop:rop_and_lop}
+    Right-operations can be constructed using left-operations as follows.
+    \begin{enumerate}
+        \item Let $\left\{\mathbf{e}_1,\dots,\mathbf{e}_k\right\}$ be the canonical basis vectors of $\mathbb{R}^k$, then $$\mathrm{Rop}_{(f,\mathbf{x})}(\mathbf{u})=\begin{pmatrix}\mathrm{Lop}_{(f,\mathbf{x})}\left(\mathbf{e}_1\right)\\\vdots\\\mathrm{Lop}_{(f,\mathbf{x})}\left(\mathbf{e}_k\right)\end{pmatrix}\mathbf{u}.$$
+        \item $\mathrm{Rop}_{(f,\mathbf{x})}(\mathbf{u})=\left(\mathrm{Lop}_{\left(\mathrm{Lop}_{(f,\mathbf{x})},\mathbf{v}\right)}(\mathbf{u})\right)^\top$
+    \end{enumerate}
+\end{proposition}
+
+\begin{tproof}
+    \begin{enumerate}
+        \item[]
+        \item Indeed, 
+        \begin{align*}
+            \begin{pmatrix}\mathrm{Lop}_{(f,\mathbf{x})}\left(\mathbf{e}_1\right)\\\vdots\\\mathrm{Lop}_{(f,\mathbf{x})}\left(\mathbf{e}_k\right)\end{pmatrix}\mathbf{u}&=\begin{pmatrix}\mathbf{e}_1^\top J_f(\mathbf{x})\\\vdots\\\mathbf{e}_k^\top J_f(\mathbf{x})\end{pmatrix}\mathbf{u}\\&=\begin{pmatrix}\left[J_f(\mathbf{x})\right]_{1,\cdot}\\\vdots\\\left[J_f(\mathbf{x})\right]_{k,\cdot}\end{pmatrix}\mathbf{u}\\&=J_f(\mathbf{x})\mathbf{u})\\&=\mathrm{Rop}_{(f,\mathbf{x})}(\mathbf{u}).
+        \end{align*}
+        \item Since $\mathrm{Lop}_{(f,\mathbf{x})}$ is a linear operator, we just have $$J_{\mathrm{Lop}_{(f,\mathbf{x})}}(\mathbf{v})=J_{f}(\mathbf{x})^\top$$for any $\mathbf{v}\in\mathbb{R}^d$. Therefore,
+        \begin{align*}
+            \left(\mathrm{Lop}_{\left(\mathrm{Lop}_{(f,\mathbf{x})},\mathbf{v}\right)}(\mathbf{u})\right)^\top&=\left(\mathbf{u}^\top J_{\mathrm{Lop}_{(f,\mathbf{x})}}(\mathbf{v})\right)^\top\\&=\left(\mathbf{u}^\top J_f(\mathbf{x})^\top\right)^\top\\&=J_f(\mathbf{x})\mathbf{u}\\&=\mathrm{Rop}_{(f,\mathbf{x})}(\mathbf{u}).
+        \end{align*}
+    \end{enumerate}
+\end{tproof}
+
+\begin{remark}
+    Note how statement 1 of Proposition \ref{prop:rop_and_lop} requires $k$ Jacobian-vector computations, whereas statement 2 of Proposition \ref{prop:rop_and_lop} requires only two Jacobian-vector computations. The utility of Proposition \ref{prop:rop_and_lop} is that left-operations are more optimised on current hardware, due to their similarity to deep network operations. In practice, the optimal approach for performing Jacobian-vector operations depends on the hardware being used and the computational graph of $f$.
+\end{remark}
+
+For a deep network that is a continuous piecewise affine operator, it is clear that $$\mathrm{Rop}_{(f,\mathbf{x})}(\mathbf{u})=A_{\omega_{\mathbf{t}(\mathbf{x})}}\mathbf{u}.$$Although this may seem promising as an approach for computing $\mathrm{Rop}_{(f,\mathbf{x})}$, computing $A_{\omega_{\mathbf{t}(\mathbf{x})}}$ suffers similar drawbacks to computing $J_f(\mathbf{x})$ making it largely infeasible. 
+
+However, for deep networks implementing ReLU, leaky ReLU or absolute value activation operators we can extract the matrices $Q^{(\ell)}[\mathbf{x}]$ from Proposition \ref{prop:characterising_region_maps_relu_deep_networks} using a single forward pass of the deep network on $\mathbf{x}$ as per statement 2 of Remark \ref{rem:characterising_region_maps_relu_deep_networks}. \textcolor{Red}{Question: After observing these matrices, what stops us from just using them to compute $A_{\omega}$ and then using that for the Rop calculation?} We can then create a clone of the deep network, where the parameter matrices are fixed using the matrices $\mathrm{diag}\left(q_{\omega_{\mathbf{s}(\mathbf{x})}}^{(\ell)}\right)$ as per Proposition \ref{prop:characterising_region_maps_relu_deep_networks} despite the input of the forward pass, we denote this cloned deep network $f_{\mathbf{x}}$. Then observe that 
+\begin{align*}
+    \mathrm{Rop}_{(f,\mathbf{x})}(\mathbf{u})&=A_{\omega_{\mathbf{s}(\mathbf{x})}}\mathbf{u}\\&=A_{\omega_{\mathbf{s}}(\mathbf{x})}\mathbf{x}+b_{\omega_{\mathbf{s}(\mathbf{x})}}-\left(A_{\omega_{\mathbf{s}(\mathbf{x})}}(\mathbf{x}-\mathbf{u})+b_{\omega_{\mathbf{s}(\mathbf{x})}}\right)\\&=f(\mathbf{x})-f_{\mathbf{x}}(\mathbf{x}-\mathbf{u}),
+\end{align*}
+meaning the right-operation on a vector $\mathbf{u}$ at $\mathbf{x}$ can be computed using two forward passes of the deep network.
+
+\begin{proposition}
+    With the cloning procedure outlined above, 
+\end{proposition}
+
+\section{References}
+
+Section \ref{sec:jvp} from \citet{balestrieroFastJacobianVectorProduct2021}.

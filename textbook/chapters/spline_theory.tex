@@ -1,0 +1,136 @@
+\section{Introduction}
+
+Spline theory is a framework for studying global function approximation using locally constructed simple functions. By partitioning the input domain judiciously, a more complex globally defined function can be well approximated using a collection of simple function constructed locally on each region of the partition. In this chapter, we will focus on the case where the simple functions are affine functions. We will start with spline operators where the underlying partition is explicitly set, and then move onto operators where the underlying partition is implicitly constructed from other parameters.
+
+\section{Affine Spline Functions}
+
+Let $\Omega=\left\{\omega_1,\dots,\omega_r\right\}$ be a set of regions partitioning the domain $\mathbb{R}^d$. Let $\Phi=\left\{\phi_1,\dots,\phi_r\right\}$ be a set of mappings operating on the regions $\Omega$, via $$\phi_j(\mathbf{x})=\left\langle[A]_{j,\cdot},\mathbf{x}\right\rangle+[B]_j$$for $\mathbf{x}\in\omega_j$ and $j=1,\dots,r$, where $A\in\mathbb{R}^{r\times d}$ is a matrix of slopes and $B\in\mathbb{R}^r$ is a vector of offsets.\footnote{Also referred to as a vector of biases.}
+
+\begin{definition}
+    An affine spline function $s[A,B,\Omega]:\mathbb{R}^d\to\mathbb{R}$ is given by $$s[A,B,\Omega](\mathbf{x})=\sum_{j=1}^r\left(\left\langle[A]_{j,\cdot},\mathbf{x}\right\rangle+\left[B\right]_j\right)\mathbf{1}_{\left\{\mathbf{x}\in\omega_j\right\}}.$$
+\end{definition}
+
+\begin{remark}\label{rem:affine_spline}
+    \begin{enumerate}
+        \item[]
+        \item More generally, the functions $\phi_j$ can be arbitrary, however we focus on the case when they are affine mappings.
+        \item For ease of notation we will often write $$s[A,B,\Omega]=\langle A[\mathbf{x}],\mathbf{x}\rangle+B[\mathbf{x}],$$where $A[x]=[A]_{j,\cdot}$ for $\mathbf{x}\in\omega_j$ and similarly for $B[\mathbf{x}]$.
+    \end{enumerate}
+\end{remark}
+
+\begin{proposition}
+    Let $s$ be an affine spline function.
+    \begin{enumerate}
+        \item $s$ is piecewise affine, and globally affine for $r=1$.
+        \item $s$ is piecewise convex, and global convex for $r=1$.
+    \end{enumerate}
+\end{proposition}
+
+\begin{remark}\label{rem:affine_spline_functions}
+    \begin{enumerate}
+        \item[]
+        \item The case for $r=1$ is usually referred to as degenerate, since it just corresponds to an affine mapping.
+        \item Note that an affine spline function need not be continuous along the boundaries between the regions $\Omega$. However, in the case that it is, we refer to the function as a continuous piecewise affine spline function.
+    \end{enumerate}
+\end{remark}
+
+\section{Affine Spline Operators}
+
+Let $\Omega=\left\{\omega_1,\dots,\omega_r\right\}$ be a set of regions partitioning the domain $\mathbb{R}^d$. Let $\Phi=\left\{\phi_1,\dots,\phi_r\right\}$ be a set of mappings operating on the regions $\Omega$, via $$\phi_j(\mathbf{x})=\left[A\right]_{\cdot,j,\cdot}\mathbf{x}+\left[B\right]_{j,\cdot}$$for $\mathbf{x}\in\omega_j$ and $j=1,\dots,r$, where $A\in\mathbb{R}^{d\times r\times k}$ is a matrix of slopes and $B\in\mathbb{R}^{r\times k}$ is a vector of offsets.
+
+\begin{definition}\label{def:affine_spline_operator}
+    An affine spline operator $S[A,B,\Omega]:\mathbb{R}^d\to\mathbb{R}^k$ is given by $$S[A,B,\Omega](\mathbf{x})=\sum_{j=1}^r\left([A]_{\cdot,j\cdot}\mathbf{x}+[B]_{j,\cdot}\right)\mathbf{1}_{\left\{\mathbf{x}\in\omega_j\right\}}.$$
+\end{definition}
+
+\begin{remark}
+    As remarked in Remark \ref{rem:affine_spline_functions}, the local mappings $\phi_j$ can be taken to be arbitrary functions, however we focus on the affine mappings. Moreover, if $S$ is continuous along its boundaries we refer to it as a continous piecewise affine spline function.
+\end{remark}
+
+An affine spline operator can be seen as a natural extension of the affine spline function. An affine spline operator is constructed by stacking independent affine spline functions. More specifically, given $k$ affine spline functions $s\left[A^{(i)},B^{(i)},\Omega^{(i)}\right]:\mathbb{R}^d\to\mathbb{R}$, the induced affine spline operator $S\left[\left(A^{(i)},B^{(i)},\Omega^{(i)}\right)_{i=1}^k\right]:\mathbb{R}^d\to\mathbb{R}^k$ is $$S\left[\left(A^{(i)},B^{(i)},\Omega^{(i)}\right)_{i=1}^k\right](\mathbf{x})=\begin{pmatrix}s\left[A^{(1)},B^{(1)},\Omega^{(1)}\right](\mathbf{x})\\\vdots\\s\left[A^{(k)},B^{(k)},\Omega^{(k)}\right](\mathbf{x})\end{pmatrix}.$$The partition structure of $S$ is not immediately clear in this construction, however it is still present, and it is explicitly given as $$\Omega=\left(\bigcup_{\left(\omega^{(1)},\dots,\omega^{(k)}\right)\in\Omega^{(1)}\times\Omega^{(k)}}\left(\bigcap_{j=1,\dots,k}\omega^{(j)}\right)\right)\setminus\emptyset.$$More specifically, the local mapping on $\omega_j=\left(\omega^{(1)},\dots,\omega^{(k)}\right)\in\Omega$ is given by $$\phi_j(\mathbf{x})=\begin{pmatrix}\phi^{(1)}_{\omega^{(1)}}(\mathbf{x})\\\vdots\\\phi^{(k)}_{\omega^{(k)}}(\mathbf{x})\end{pmatrix},$$where $\phi^{(1)}_{\omega^{(1)}}$ denotes the local mapping of $s\left[A^{(1)},B^{(1)},\Omega^{(1)}\right]$ on the region $\omega^{(1)}\in\Omega^{(1)}$. Note that by construction we have $\omega_j\subseteq\omega^{(i)}$ for each $i=1,\dots,k$. In particular, if $\omega^{(i)}=\in\Omega^{(i)}$ has index $q_i$, then we also have $\omega_j\cap\omega_p^{(i)}=\emptyset$ for $p\in\{1,\dots,r^{(i)}\}\setminus q_i$. In other words, for $r=\vert\Omega\vert$ we have that for all $(j,i)\in\{1,\dots,r\}\times\{1,\dots,k\}$ there exists a unique $q_i\in\left\{1,\dots,r^{(i)}\right\}$ such that $$\omega_j\cap\omega^{(i)}_p=\begin{cases}\omega_j&p=q_i\\\emptyset&p\neq q_i.\end{cases}$$Allowing us to write 
+\begin{align*}
+    \phi_j(\mathbf{x})&=\begin{pmatrix}\phi_{q_1}^{(1)}(\mathbf{x})\\\vdots\\\phi_{q_k}^{(k)}(\mathbf{x})\end{pmatrix}\\&=\begin{pmatrix}\left[A^{(1)}\right]_{q_1,\cdot}^\top\\\vdots\\\left[A^{(k)}\right]_{q_k,\cdot}\end{pmatrix}\mathbf{x}+\begin{pmatrix}\left[B^{(1)}\right]_{q_1}\\\vdots\\\left[B^{(k)}\right]_{q_k}\end{pmatrix}\\&=:[A]_{\cdot,j,\cdot}\mathbf{x}+[B]_{j,\cdot},
+\end{align*}
+allowing us to recover the construction given in Definition \ref{def:affine_spline_operator} as $$S\left[A,B,\Omega\right]=\sum_{j=1}^r\phi_j(\mathbf{x})\mathbf{1}_{\{\mathbf{X}\in\omega_j\}}.$$
+
+\section{Max-Affine Spline Functions}
+
+The specification of a partitioning $\Omega$ for affine spline functions is burdensome in practical settings. Therefore, it is of interest to eliminate it by imposing some additional conditional on its constructions. However, this will inevitably reduce the expressivity of the resulting class of functions.
+
+\begin{definition}\label{def:max_affine_spline_function}
+    A max-affine spline function $s[A,B]:\mathbb{R}^d\to\mathbb{R}$ is given by $$s[A,B]=\max_{j=1,\dots,r}\left(\left\langle[A]_{j,\cdot},\mathbf{x}\right\rangle+[B]_j\right),$$for $A\in\mathbb{R}^{r\times d}$ and $B\in\mathbb{R}^r$.
+\end{definition}
+
+\begin{remark}
+    The partition $\Omega$ is not specified in Definition \ref{def:max_affine_spline_function} since it is implicitly constructed with the maximum operator. Indeed, a max-affine spline function is completely determined by the parameters $A$ and $B$.
+\end{remark}
+
+As pre-cautioned, max affine spline functions express a restricted space of functions, however, as we will see in Proposition \ref{prop:max_affine_spline_properties}, this restriction is still meaningful.
+
+\begin{proposition}\label{prop:max_affine_spline_properties}
+    Let $s$ be a max-affine spline function.
+    \begin{enumerate}
+        \item $s$ is piecewise affine.
+        \item $s$ is globally convex.
+        \item $s$ is continuous.
+    \end{enumerate}
+\end{proposition}
+
+\begin{tproof}
+    \begin{enumerate}
+        \item[]
+        \item The partition $\Omega$ of induced by $s$ contains finitely many regions. On each of these regions $s$ is an affine function, namely $\left\langle[A]_{j,\cdot},\mathbf{x}\right\rangle+[B]_j$ for some $j=1,\dots,r$. Therefore, $s$ is piecewise affine.
+        \item Let $\mathbf{x},\mathbf{x}^\prime\in\mathbb{R}^d$. Then for $\lambda\in[0,1]$ we have, 
+        \begin{align*}
+            s\left(\lambda\mathbf{x}+(1-\lambda)\mathbf{x}^\prime\right)&=\max_{j=1,\dots,r}\left(\left\langle[A]_{j,\cdot},\lambda\mathbf{x}+(1-\lambda)\mathbf{x}^\prime\right\rangle+[B]_j\right)\\&=\max_{j=1,\dots,r}\Big(\left\langle[A]_{j,\cdot},\lambda\mathbf{x}\right\rangle+\left\langle[A]_{j,\cdot},(1-\lambda)\mathbf{x}^\prime\right\rangle\\&\quad+\lambda[B]_j+(1-\lambda)[B]_j\Big)\\&\leq\lambda\max_{j=1,\dots,r}\left(\left\langle[A]_{j,\cdot},\mathbf{x}\right\rangle+[B]_j\right)\\&+(1-\lambda)\max_{j=1,\dots,r}\left(\left\langle[A]_{j,\cdot},\mathbf{x}^\prime\right\rangle+[B]_j\right)\\&=\lambda s(\mathbf{x})+(1-\lambda)s\left(\mathbf{x}^\prime\right).
+        \end{align*}
+        \item Using statements 1 and 2, we have that $s$ is piecewise affine and globally convex. Continuity can only fail at knots of $s$. Suppose for contradiction that $s$ is not continuous at $x\in\mathbb{R}$. In particular, suppose without loss of generality that for $z\nearrow x$ we have $s(z)\to y_1$, and for $z\searrow x$ we have $s(z)\to y_2$ with $y_1<y_2$. Now choose $\tilde{z}\in\left(x,x+\epsilon\right)$, for some $\epsilon>0$, such that $z$ is part of the same affine component as $x_+$ and $s\left(\tilde{z}\right)>y_1$. Now let $$\begin{cases}\lambda=\frac{1}{2}\left(\frac{y_2-y_1}{s\left(\tilde{z}\right)-y_1}\right)&s\left(\tilde{z}\right)>y_2\\\frac{1}{2}&\text{otherwise.}\end{cases}$$The point $\lambda x+(1-\lambda)\tilde{z}$ is in the same affine component as $x_+$ and $\tilde{z}$. Thus, 
+        \begin{align*}
+            s\left(\lambda x+(1-\lambda)\tilde{x}\right)&=\lambda s\left(x_+\right)+(1-\lambda)s\left(\tilde{z}\right)\\&\in\left(\min\left(y_2,s\left(\tilde{z}\right)\right),\max\left(y_2,s\left(\tilde{z}\right)\right)\right).
+        \end{align*}
+        However, $$\lambda s\left(x_-\right)+(1-\lambda)s\left(\tilde{z}\right)\in\left(y_1,\min\left(y_2,s\left(\tilde{z}\right)\right)\right),$$meaning $s$ is not globally convex. Therefore, it must be the case that $s$ is continuous at $x$, and thus $s$ is continuous.
+    \end{enumerate}
+\end{tproof}
+
+Due to statement 3 of Proposition \ref{prop:max_affine_spline_properties} tells us that max-affine spline functions are continuous piecewise affine spline functions.
+
+\begin{proposition}\label{prop:continuous_is_max_affine_spline}
+    For any function $h$ that is piecewise affine and globally convex, there exists parameters $A$ and $B$ such that $$h(\mathbf{x})=s[A,B](\mathbf{x})$$for every $\mathbf{x}\in\mathbb{R}^d$.
+\end{proposition}
+
+\begin{remark}
+    Note how the combination of statements 1 and 2 from Proposition \ref{prop:max_affine_spline_properties} and Proposition \ref{prop:continuous_is_max_affine_spline} provide an equivalence between max-affine spline functions and piecewise affine, globally convex functions.
+\end{remark}
+
+\section{Max-Affine Spline Operators}
+
+As in the case of affine spline operators, max-affine spline operators are the natural multi-dimensional extension of max-affine spline functions, obtained by stacking independent max-affine spline functions.
+
+\begin{definition}
+    A max-affine spline operator $S[A,B]:\mathbb{R}^d\to\mathbb{R}^k$ is an affine spline operator, constructed by stacking $k$ max-affine spline functions $$S[A,B](\mathbf{x})=\begin{pmatrix}\max_{j=1,\dots,r}\left(\left\langle[A]_{1,j,\cdot},\mathbf{x}\right\rangle+[B]_{1,j}\right)\\\vdots\\\max_{j=1,\dots,r}\left(\left\langle[A]_{k,j,\cdot},\mathbf{x}\right\rangle+[B]_{k,j}\right)\end{pmatrix},$$where $A\in\mathbb{R}^{k\times r\times d}$ and $B\in\mathbb{R}^{k\times r}$.
+\end{definition}
+
+\begin{proposition}
+    For any operator $H$ that is piecewise affine and globally convex, there exists parameters $A$ and $B$ such that $$H(\mathbf{x})=S[A,B](\mathbf{x})$$for every $\mathbf{x}\in\mathbb{R}^d$.
+\end{proposition}
+
+\begin{definition}
+    A Lipschitz constant of an operator $f:\mathbb{R}^d\to\mathbb{R}^k$ is a constant $\kappa\in\mathbb{R}$ such that $$\left\Vert f\left(\mathbf{x}_1\right)-f\left(\mathbf{x}_2\right)\right\Vert_2\leq\kappa\left\Vert\mathbf{x}_1-\mathbf{x}_2\right\Vert_2,$$for every $\mathbf{x}_1,\mathbf{x}_2\in\mathbb{R}^d$.
+\end{definition}
+
+Reference to \emph{the} Lipschitz constant refers to smallest such constant.
+
+\begin{proposition}\label{prop:maso_lipschitz}
+    A Lipschitz constant of a max-affine spline operator $S[A,B]:\mathbb{R}^d\to\mathbb{R}^k$ is $$\kappa=\sqrt{\sum_{i=1}^d\left(\max_{j=1,\dots,r}\left\Vert[A]_{i,j,\cdot}\right\Vert\right)^2}.$$
+\end{proposition}
+
+\begin{tproof}
+    Let $\mathbf{x}_1,\mathbf{x}_2\in\mathbb{R}^d$, then
+    \begin{align*}
+        \left\Vert S[A,B]\left(\mathbf{x}_1\right)-S[A,B]\left(\mathbf{x}_2\right)\right\Vert^2&=\sum_{i=1}^d\left\vert[\left[S[A,B]\left(\mathbf{x}_1\right)\right]_i-\left[S[A,B]\left(\mathbf{x}_2\right)\right]_i\right\vert^2\\&=\sum_{i=1}^d\left\vert\max_{j=1,\dots,r}\left(\left\langle[A]_{i,j,\cdot},\mathbf{x}_1\right\rangle+[B]_j\right)-\max_{j=1,\dots,r}\left(\left\langle[A]_{i,j,\cdot},\mathbf{x}_2\right\rangle+[B]_j\right)\right\vert^2\\&\leq\sum_{i=1}^d\left\vert\max_{j=1,\dots,r}\left(\left\langle[A]_{i,j,\cdot},\mathbf{x}_1-\mathbf{x}_2\right\rangle\right)\right\vert^2\\&\overset{(1)}{\leq}\left(\sum_{i=1}^d\left(\max_{j=1,\dots,r}\left\Vert[A]_{i,j,\cdot}\right\Vert\right)^2\right)\left\Vert\mathbf{x}_1-\mathbf{x}_2\right\Vert^2,
+    \end{align*}
+    where $(1)$ is an application of the Cauchy-Schwarz inequality. Therefore, a Lipschitz constant of $S$ is $$\kappa=\sqrt{\sum_{i=1}^d\left(\max_{j=1,\dots,r}\left\Vert[A]_{i,j,\cdot}\right\Vert\right)^2}.$$
+\end{tproof}
+
+\section{References}
+
+Chapter \ref{ch:spline_theory} from \citet{balestrieroMadMaxAffine2018}.

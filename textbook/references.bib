@@ -1,0 +1,346 @@
+@book{alexanderschrijverTheoryLinearInteger1998,
+  title = {Theory of {{Linear}} and {{Integer Programming}}},
+  author = {{Alexander Schrijver}},
+  year = {1998},
+  publisher = {John Wiley \& Sons},
+  urldate = {2024-11-21},
+  abstract = {Theory of Linear and Integer Programming Alexander Schrijver Centrum voor Wiskunde en Informatica, Amsterdam, The Netherlands This book describes the theory of linear and integer programming and surveys the algorithms for linear and integer programming problems, focusing on complexity analysis. It aims at complementing the more practically oriented books in this field. A special feature is the author's coverage of important recent developments in linear and integer programming. Applications to combinatorial optimization are given, and the author also includes extensive historical surveys and bibliographies. The book is intended for graduate students and researchers in operations research, mathematics and computer science. It will also be of interest to mathematical historians. Contents 1 Introduction and preliminaries; 2 Problems, algorithms, and complexity; 3 Linear algebra and complexity; 4 Theory of lattices and linear diophantine equations; 5 Algorithms for linear diophantine equations; 6 Diophantine approximation and basis reduction; 7 Fundamental concepts and results on polyhedra, linear inequalities, and linear programming; 8 The structure of polyhedra; 9 Polarity, and blocking and anti-blocking polyhedra; 10 Sizes and the theoretical complexity of linear inequalities and linear programming; 11 The simplex method; 12 Primal-dual, elimination, and relaxation methods; 13 Khachiyan's method for linear programming; 14 The ellipsoid method for polyhedra more generally; 15 Further polynomiality results in linear programming; 16 Introduction to integer linear programming; 17 Estimates in integer linear programming; 18 The complexity of integer linear programming; 19 Totally unimodular matrices: fundamental properties and examples; 20 Recognizing total unimodularity; 21 Further theory related to total unimodularity; 22 Integral polyhedra and total dual integrality; 23 Cutting planes; 24 Further methods in integer linear programming; Historical and further notes on integer linear programming; References; Notation index; Author index; Subject index},
+  langid = {english}
+}
+
+@inproceedings{balestrieroAnalyticalProbabilityDistributions2020,
+  title = {Analytical {{Probability Distributions}} and {{Exact Expectation-Maximization}} for {{Deep Generative Networks}}},
+  booktitle = {Neural {{Information Processing Systems}}},
+  author = {Balestriero, Randall and Paris, S{\'e}bastien and Baraniuk, Richard},
+  year = {2020},
+  urldate = {2025-01-06},
+  abstract = {Deep Generative Networks (DGNs) with probabilistic modeling of their output and latent space are currently trained via Variational Autoencoders (VAEs). In the absence of a known analytical form for the posterior and likelihood expectation, VAEs resort to approximations, including (Amortized) Variational Inference (AVI) and Monte-Carlo sampling. We exploit the Continuous Piecewise Affine property of modern DGNs to derive their posterior and marginal distributions as well as the latter's first two moments. These findings enable us to derive an analytical Expectation-Maximization (EM) algorithm for gradient-free DGN learning. We demonstrate empirically that EM training of DGNs produces greater likelihood than VAE training. Our new framework will guide the design of new VAE AVI that better approximates the true posterior and open new avenues to apply standard statistical tools for model comparison, anomaly detection, and missing data imputation.}
+}
+
+@misc{balestrieroBatchNormalizationExplained2022,
+  title = {Batch {{Normalization Explained}}},
+  author = {Balestriero, Randall and Baraniuk, Richard G.},
+  year = {2022},
+  month = sep,
+  number = {arXiv:2209.14778},
+  eprint = {2209.14778},
+  publisher = {arXiv},
+  doi = {10.48550/arXiv.2209.14778},
+  urldate = {2024-12-11},
+  abstract = {A critically important, ubiquitous, and yet poorly understood ingredient in modern deep networks (DNs) is batch normalization (BN), which centers and normalizes the feature maps. To date, only limited progress has been made understanding why BN boosts DN learning and inference performance; work has focused exclusively on showing that BN smooths a DN's loss landscape. In this paper, we study BN theoretically from the perspective of function approximation; we exploit the fact that most of today's state-of-the-art DNs are continuous piecewise affine (CPA) splines that fit a predictor to the training data via affine mappings defined over a partition of the input space (the so-called "linear regions"). \{{\textbackslash}em We demonstrate that BN is an unsupervised learning technique that -- independent of the DN's weights or gradient-based learning -- adapts the geometry of a DN's spline partition to match the data.\} BN provides a "smart initialization" that boosts the performance of DN learning, because it adapts even a DN initialized with random weights to align its spline partition with the data. We also show that the variation of BN statistics between mini-batches introduces a dropout-like random perturbation to the partition boundaries and hence the decision boundary for classification problems. This per mini-batch perturbation reduces overfitting and improves generalization by increasing the margin between the training samples and the decision boundary.},
+  archiveprefix = {arXiv},
+  keywords = {Computer Science - Artificial Intelligence,Computer Science - Computational Geometry,Computer Science - Computer Vision and Pattern Recognition,Computer Science - Machine Learning,Statistics - Machine Learning}
+}
+
+@inproceedings{balestrieroCharacterizingLargeLanguage2023,
+  title = {Characterizing {{Large Language Model Geometry Helps Solve Toxicity Detection}} and {{Generation}}},
+  booktitle = {International {{Conference}} on {{Machine Learning}}},
+  author = {Balestriero, Randall and Cosentino, Romain and Shekkizhar, Sarath},
+  year = {2023},
+  month = dec,
+  abstract = {Large Language Models (LLMs) drive current AI breakthroughs despite very little being known about their internal representations. In this work, we propose to shed the light on LLMs inner mechanisms through the lens of geometry. In particular, we develop in closed form \$(i)\$ the intrinsic dimension in which the Multi-Head Attention embeddings are constrained to exist and \$(ii)\$ the partition and per-region affine mappings of the feedforward (MLP) network of LLMs' layers. Our theoretical findings further enable the design of novel principled solutions applicable to state-of-the-art LLMs. First, we show that, through our geometric understanding, we can bypass LLMs' RLHF protection by controlling the embedding's intrinsic dimension through informed prompt manipulation. Second, we derive interpretable geometrical features that can be extracted from any (pre-trained) LLM, providing a rich abstract representation of their inputs. We observe that these features are sufficient to help solve toxicity detection, and even allow the identification of various types of toxicity. Our results demonstrate how, even in large-scale regimes, exact theoretical results can answer practical questions in LLMs. Code: https://github.com/RandallBalestriero/SplineLLM}
+}
+
+@misc{balestrieroFastJacobianVectorProduct2021,
+  title = {Fast {{Jacobian-Vector Product}} for {{Deep Networks}}},
+  author = {Balestriero, Randall and Baraniuk, Richard},
+  year = {2021},
+  month = apr,
+  number = {arXiv:2104.00219},
+  eprint = {2104.00219},
+  publisher = {arXiv},
+  abstract = {Jacobian-vector products (JVPs) form the backbone of many recent developments in Deep Networks (DNs), with applications including faster constrained optimization, regularization with generalization guarantees, and adversarial example sensitivity assessments. Unfortunately, JVPs are computationally expensive for real world DN architectures and require the use of automatic differentiation to avoid manually adapting the JVP program when changing the DN architecture. We propose a novel method to quickly compute JVPs for any DN that employ Continuous Piecewise Affine (e.g., leaky-ReLU, max-pooling, maxout, etc.) nonlinearities. We show that our technique is on average \$2{\textbackslash}times\$ faster than the fastest alternative over \$13\$ DN architectures and across various hardware. In addition, our solution does not require automatic differentiation and is thus easy to deploy in software, requiring only the modification of a few lines of codes that do not depend on the DN architecture.},
+  archiveprefix = {arXiv},
+  keywords = {Computer Science - Machine Learning}
+}
+
+@inproceedings{balestrieroGeometryDeepNetworks2019,
+  title = {The {{Geometry}} of {{Deep Networks}}: {{Power Diagram Subdivision}}},
+  shorttitle = {The {{Geometry}} of {{Deep Networks}}},
+  booktitle = {Neural {{Information Processing Systems}}},
+  author = {Balestriero, Randall and Cosentino, Romain and Aazhang, Behnaam and Baraniuk, Richard},
+  year = {2019},
+  month = may,
+  abstract = {We study the geometry of deep (neural) networks (DNs) with piecewise affine and convex nonlinearities. The layers of such DNs have been shown to be \{{\textbackslash}em max-affine spline operators\} (MASOs) that partition their input space and apply a region-dependent affine mapping to their input to produce their output. We demonstrate that each MASO layer's input space partitioning corresponds to a \{{\textbackslash}em power diagram\} (an extension of the classical Voronoi tiling) with a number of regions that grows exponentially with respect to the number of units (neurons). We further show that a composition of MASO layers (e.g., the entire DN) produces a progressively subdivided power diagram and provide its analytical form. The subdivision process constrains the affine maps on the (exponentially many) power diagram regions to greatly reduce their complexity. For classification problems, we obtain a formula for a MASO DN's decision boundary in the input space plus a measure of its curvature that depends on the DN's nonlinearities, weights, and architecture. Numerous numerical experiments support and extend our theoretical results.}
+}
+
+@misc{balestrieroMadMaxAffine2018,
+  title = {Mad {{Max}}: {{Affine Spline Insights}} into {{Deep Learning}}},
+  shorttitle = {Mad {{Max}}},
+  author = {Balestriero, Randall and Baraniuk, Richard},
+  year = {2018},
+  month = nov,
+  number = {arXiv:1805.06576},
+  eprint = {1805.06576},
+  publisher = {arXiv},
+  doi = {10.48550/arXiv.1805.06576},
+  urldate = {2024-12-09},
+  abstract = {We build a rigorous bridge between deep networks (DNs) and approximation theory via spline functions and operators. Our key result is that a large class of DNs can be written as a composition of max-affine spline operators (MASOs), which provide a powerful portal through which to view and analyze their inner workings. For instance, conditioned on the input signal, the output of a MASO DN can be written as a simple affine transformation of the input. This implies that a DN constructs a set of signal-dependent, class-specific templates against which the signal is compared via a simple inner product; we explore the links to the classical theory of optimal classification via matched filters and the effects of data memorization. Going further, we propose a simple penalty term that can be added to the cost function of any DN learning algorithm to force the templates to be orthogonal with each other; this leads to significantly improved classification performance and reduced overfitting with no change to the DN architecture. The spline partition of the input signal space that is implicitly induced by a MASO directly links DNs to the theory of vector quantization (VQ) and \$K\$-means clustering, which opens up new geometric avenue to study how DNs organize signals in a hierarchical fashion. To validate the utility of the VQ interpretation, we develop and validate a new distance metric for signals and images that quantifies the difference between their VQ encodings. (This paper is a significantly expanded version of A Spline Theory of Deep Learning from ICML 2018.)},
+  archiveprefix = {arXiv},
+  keywords = {Computer Science - Machine Learning,Statistics - Machine Learning}
+}
+
+@inproceedings{balestrieroPoliceProvablyOptimal2023,
+  title = {Police: {{Provably Optimal Linear Constraint Enforcement For Deep Neural Networks}}},
+  shorttitle = {Police},
+  booktitle = {{{IEEE International Conference}} on {{Acoustics}}, {{Speech}} and {{Signal Processing}}},
+  author = {Balestriero, Randall and LeCun, Yann},
+  year = {2023},
+  month = jun,
+  issn = {2379-190X},
+  urldate = {2024-12-14},
+  abstract = {Deep Neural Networks (DNNs) outshine alternative function approximators in many settings thanks to their modularity in composing any desired differentiable operator. The formed parametrized functional is then tuned to solve a task at hand from simple gradient descent. This modularity comes at the cost of making strict enforcement of constraints on DNNs, e.g. from a priori knowledge of the task, or from desired physical properties, an open challenge. In this paper we propose the first provable affine constraint enforcement method for DNNs that only requires minimal changes into a given DNN's forward-pass, that is computationally friendly, and that leaves the optimization of the DNN's parameter to be unconstrained, i.e. standard gradient-based method can be employed. Our method does not require any sampling and provably ensures that the DNN fulfills the affine constraint on a given input space's region at any point during training, and testing. We coin this method POLICE, standing for Provably Optimal LInear Constraint Enforcement. Github: https://github.com/RandallBalestriero/POLICE},
+  keywords = {Deep learning,Law enforcement,Neural networks,Signal processing,Speech processing,Task analysis,Training}
+}
+
+@misc{blackInterpretingNeuralNetworks2022,
+  title = {Interpreting {{Neural Networks}} through the {{Polytope Lens}}},
+  author = {Black, Sid and Sharkey, Lee and Grinsztajn, Leo and Winsor, Eric and Braun, Dan and Merizian, Jacob and Parker, Kip and Guevara, Carlos Ram{\'o}n and Millidge, Beren and Alfour, Gabriel and Leahy, Connor},
+  year = {2022},
+  month = nov,
+  number = {arXiv:2211.12312},
+  eprint = {2211.12312},
+  publisher = {arXiv},
+  doi = {10.48550/arXiv.2211.12312},
+  abstract = {Mechanistic interpretability aims to explain what a neural network has learned at a nuts-and-bolts level. What are the fundamental primitives of neural network representations? Previous mechanistic descriptions have used individual neurons or their linear combinations to understand the representations a network has learned. But there are clues that neurons and their linear combinations are not the correct fundamental units of description: directions cannot describe how neural networks use nonlinearities to structure their representations. Moreover, many instances of individual neurons and their combinations are polysemantic (i.e. they have multiple unrelated meanings). Polysemanticity makes interpreting the network in terms of neurons or directions challenging since we can no longer assign a specific feature to a neural unit. In order to find a basic unit of description that does not suffer from these problems, we zoom in beyond just directions to study the way that piecewise linear activation functions (such as ReLU) partition the activation space into numerous discrete polytopes. We call this perspective the polytope lens. The polytope lens makes concrete predictions about the behavior of neural networks, which we evaluate through experiments on both convolutional image classifiers and language models. Specifically, we show that polytopes can be used to identify monosemantic regions of activation space (while directions are not in general monosemantic) and that the density of polytope boundaries reflect semantic boundaries. We also outline a vision for what mechanistic interpretability might look like through the polytope lens.},
+  archiveprefix = {arXiv},
+  keywords = {Computer Science - Artificial Intelligence,Computer Science - Machine Learning}
+}
+
+@article{breimanHingingHyperplanesRegression1993,
+  title = {Hinging Hyperplanes for Regression, Classification, and Function Approximation},
+  author = {Breiman, L.},
+  year = {1993},
+  month = may,
+  journal = {IEEE Transactions on Information Theory},
+  volume = {39},
+  number = {3},
+  issn = {1557-9654},
+  doi = {10.1109/18.256506},
+  urldate = {2024-12-20},
+  abstract = {A hinge function y=h(x) consists of two hyperplanes continuously joined together at a hinge. In regression (prediction), classification (pattern recognition), and noiseless function approximation, use of sums of hinge functions gives a powerful and efficient alternative to neural networks with computation times several orders of magnitude less than is obtained by fitting neural networks with a comparable number of parameters. A simple and effective method for finding good hinges is presented.{$<>$}},
+  keywords = {Computer networks,Function approximation,Least squares methods,Multidimensional systems,Neural networks,Pattern recognition,Spline,Statistics}
+}
+
+@inproceedings{cosentinoDeepAutoencodersUnderstanding2022,
+  title = {Deep {{Autoencoders}}: {{From Understanding}} to {{Generalization Guarantees}}},
+  shorttitle = {Deep {{Autoencoders}}},
+  booktitle = {Proceedings of the 2nd {{Mathematical}} and {{Scientific Machine Learning Conference}}},
+  author = {Cosentino, Romain and Balestriero, Randall and Baranuik, Richard and Aazhang, Behnaam},
+  year = {2022},
+  month = apr,
+  abstract = {A big mystery in deep learning continues to be the ability of methods to generalize when the number of model parameters is larger than the number of training examples. In this work, we take a step towards a better understanding of the underlying phenomena of Deep Autoencoders (AEs), a mainstream deep learning solution for learning compressed, interpretable, and structured data representations. In particular, we interpret how AEs approximate the data manifold by exploiting their continuous piecewise affine structure. Our reformulation of AEs provides new insights into their mapping, reconstruction guarantees, as well as an interpretation of commonly used regularization techniques. We leverage these findings to derive two new regularizations that enable AEs to capture the inherent symmetry in the data. Our regularizations leverage recent advances in the group of transformation learning to enable AEs to better approximate the data manifold without explicitly defining the group underlying the manifold. Under the assumption that the symmetry of the data can be explained by a Lie group, we prove that the regularizations ensure the generalization of the corresponding AEs. A range of experimental evaluations demonstrate that our methods outperform other state-of-the-art regularization techniques.}
+}
+
+@misc{cosentinoReasoningLargeLanguage2024,
+  title = {Reasoning in {{Large Language Models}}: {{A Geometric Perspective}}},
+  author = {Cosentino, Romain and Shekkizhar, Sarath},
+  year = {2024},
+  month = jul,
+  number = {arXiv:2407.02678},
+  eprint = {2407.02678},
+  publisher = {arXiv},
+  urldate = {2024-12-27},
+  abstract = {The advancement of large language models (LLMs) for real-world applications hinges critically on enhancing their reasoning capabilities. In this work, we explore the reasoning abilities of large language models (LLMs) through their geometrical understanding. We establish a connection between the expressive power of LLMs and the density of their self-attention graphs. Our analysis demonstrates that the density of these graphs defines the intrinsic dimension of the inputs to the MLP blocks. We demonstrate through theoretical analysis and toy examples that a higher intrinsic dimension implies a greater expressive capacity of the LLM. We further provide empirical evidence linking this geometric framework to recent advancements in methods aimed at enhancing the reasoning capabilities of LLMs.},
+  archiveprefix = {arXiv},
+  keywords = {Computer Science - Artificial Intelligence,Computer Science - Computation and Language}
+}
+
+@inproceedings{gambaAreAllLinear2022,
+  title = {Are All Linear Regions Created Equal?},
+  booktitle = {Proceedings of the 25th {{Iinternational Conference}} on {{Artificial Intelligence}} and {{Statistics}}},
+  author = {Gamba, Matteo and {Chmielewski-Anders}, Adrian and Sullivan, Josephine and Azizpour, Hossein and Bjorkman, Marten},
+  editor = {{Camps-Valls}, Gustau and Ruiz, Francisco J. R. and Valera, Isabel},
+  year = {2022},
+  month = mar,
+  volume = {151},
+  pages = {6573--6590},
+  publisher = {PMLR},
+  abstract = {The number of linear regions has been studied as a proxy of complexity for ReLU networks. However, the empirical success of network compression techniques like pruning and knowledge distillation, suggest that in the overparameterized setting, linear regions density might fail to capture the effective nonlinearity. In this work, we propose an efficient algorithm for discovering linear regions and use it to investigate the effectiveness of density in capturing the nonlinearity of trained VGGs and ResNets on CIFAR-10 and CIFAR-100. We contrast the results with a more principled nonlinearity measure based on function variation, highlighting the shortcomings of linear regions density. Furthermore, interestingly, our measure of nonlinearity clearly correlates with model-wise deep double descent, connecting reduced test error with reduced nonlinearity, and increased local similarity of linear regions.}
+}
+
+@article{gaoLIPLocalImportanceBased2023,
+  title = {{{LIP}}: {{Local Importance-Based Pooling}}},
+  shorttitle = {{{LIP}}},
+  author = {Gao, Ziteng and Wang, Limin and Wu, Gangshan},
+  year = {2023},
+  month = jan,
+  journal = {International Journal of Computer Vision},
+  volume = {131},
+  number = {1},
+  urldate = {2024-12-21},
+  abstract = {Spatial downsampling layers are favored in convolutional neural networks (CNNs) to downscale feature maps for larger receptive fields and less memory consumption. However, for visual recognition tasks, these layers might lose discriminative details due to improper pooling strategies. In this paper, we present a unified framework (LAN) over the common downsampling layers (e.g., average pooling, max pooling, and strided convolution) from a view of local aggregation based on importance. In this LAN framework, we analyze the issues of these widely-used pooling layers and figure out the criteria of designing an effective downsampling layer. Based on this analysis, we propose a simple, general, and effective pooling operation based on local importance modeling, termed as Local Importance-based Pooling (LIP). LIP is able to enhance discriminative features during the downsampling procedure by learning adaptive importance weights based on inputs. To further modulate different pooling windows for more effective pooling, we present the improved version of LIP, termed LIP++, by introducing an explicit margin term and efficient logit modules. Our LIP++ can yield consistent accuracy improvement over the original LIP yet with a smaller computational cost. Extensive experiments show that our presented LIP method consistently yields notable gains with different CNN architectures on the image classification task. In the challenging MS COCO dataset, detectors with our LIP-ResNets as backbones obtain a consistent performance improvement over the vanilla ResNets on both bounding box detection and instance segmentation. Finally, we also verify the effectiveness of LIP on the tasks of pose estimation and semantic segmentation, demonstrating its generalization to the dense prediction task.},
+  langid = {english}
+}
+
+@inproceedings{hubenSparseAutoencodersFind2024,
+  title = {Sparse Autoencoders Find Highly Interpretable Features in Language Models},
+  booktitle = {The {{Twelfth International Conference}} on {{Learning Representations}}},
+  author = {Huben, Robert and Cunningham, Hoagy and Smith, Logan Riggs and Ewart, Aidan and Sharkey, Lee},
+  year = {2024}
+}
+
+@misc{huCurvatureTuningProvable2025,
+  title = {Curvature {{Tuning}}: {{Provable Training-free Model Steering From}} a {{Single Parameter}}},
+  author = {Hu, Leyang and Balestriero, Randall},
+  year = {2025},
+  month = feb,
+  number = {arXiv:2502.07783},
+  eprint = {2502.07783},
+  publisher = {arXiv},
+  urldate = {2025-02-20},
+  abstract = {The scaling of model size and data size has reshaped the paradigm of AI. As a result, the common protocol to leverage the latest models is to steer them towards a specific downstream task of interest through \{{\textbackslash}em fine-tuning\}. Despite its importance, the main methods for fine-tuning remain limited to full or low-rank adapters--containing countless hyper-parameters and lacking interpretability. In this paper, we take a step back and demonstrate how novel and explainable post-training steering solutions can be derived theoretically from \{{\textbackslash}em spline operators\}, a rich mathematical framing of Deep Networks that was recently developed. Our method--coined {\textbackslash}textbf\{Curvature Tuning (CT)\}--has a single parameter that provably modulates the curvature of the model's decision boundary henceforth allowing training-free steering. This makes CT both more efficient and interpretable than conventional fine-tuning methods. We empirically validate its effectiveness in improving generalization and robustness of pretrained models. For example, CT improves out-of-distribution transfer performances of ResNet-18/50 by 2.57{\textbackslash}\%/1.74{\textbackslash}\% across seventeen downstream datasets, and improves RobustBench robust accuracy by 11.76{\textbackslash}\%/348.44{\textbackslash}\%. Additionally, we apply CT to ReLU-based Swin-T/S, improving their generalization on nine downstream datasets by 2.43{\textbackslash}\%/3.33{\textbackslash}\%. Our code is available at {\textbackslash}href\{https://github.com/Leon-Leyang/curvature-tuning\}\{https://github.com/Leon-Leyang/curvature-tuning\}.},
+  archiveprefix = {arXiv},
+  keywords = {Computer Science - Machine Learning}
+}
+
+@inproceedings{humayunDeepNetworksAlways2024,
+  title = {Deep {{Networks Always Grok}} and {{Here}} Is {{Why}}},
+  booktitle = {High-Dimensional {{Learning Dynamics}} 2024: {{The Emergence}} of {{Structure}} and {{Reasoning}}},
+  author = {Humayun, Ahmed Imtiaz and Balestriero, Randall and Baraniuk, Richard},
+  year = {2024},
+  month = jun,
+  abstract = {Grokking, or \{{\textbackslash}em delayed generalization\}, is a phenomenon where generalization in a deep neural network (DNN) occurs long after achieving near zero training error. Previous studies have reported the occurrence of grokking in specific controlled settings, such as DNNs initialized with large-norm parameters or transformers trained on algorithmic datasets. We demonstrate that grokking is actually much more widespread and materializes in a wide range of practical settings, such as training of a convolutional neural network (CNN) on CIFAR10 or a Resnet on Imagenette. We introduce the new concept of \{{\textbackslash}em delayed robustness\}, whereby a DNN groks adversarial examples and becomes robust, long after interpolation and/or generalization. We develop an analytical explanation for the emergence of both delayed generalization and delayed robustness based on the \{{\textbackslash}em local complexity\} of a DNN's input-output mapping. Our {\textbackslash}textit\{local complexity\} measures the density of so-called ``linear regions'' (aka, spline partition regions) that tile the DNN input space.}
+}
+
+@inproceedings{humayunMaGNETUniformSampling2022,
+  title = {{{MaGNET}}: {{Uniform Sampling}} from {{Deep Generative Network Manifolds Without Retraining}}},
+  booktitle = {International {{Conference}} on {{Learning Representations}}},
+  author = {Humayun, Ahmed Imtiaz and Balestriero, Randall and Baraniuk, Richard},
+  year = {2022},
+  month = jan,
+  abstract = {Deep Generative Networks (DGNs) are extensively employed in Generative Adversarial Networks (GANs), Variational Autoencoders (VAEs), and their variants to approximate the data manifold, and data distribution on that manifold. However, training samples are often obtained based on preferences, costs, or convenience producing artifacts in the empirical data distribution e.g. the large fraction of smiling faces in the CelebA dataset or the large fraction of dark-haired individuals in FFHQ). \{{\textbackslash}em These inconsistencies will be reproduced when sampling from the trained DGN, which has far-reaching potential implications for fairness, data augmentation, anomaly detection, domain adaptation, and beyond.\} In response, we develop a differential geometry based sampler -coined MaGNET- that, given any trained DGN, produces samples that are uniformly distributed on the learned manifold. We prove theoretically and empirically that our technique produces a uniform distribution on the manifold regardless of the training set distribution. We perform a range of experiments on various datasets and DGNs. One of them considers the state-of-the-art StyleGAN2 trained on FFHQ dataset, where uniform sampling via MaGNET increases distribution precision {\textbackslash}\& recall by 4.12{\textbackslash}\% {\textbackslash}\& 3.01{\textbackslash}\% and decreases gender bias by 41.2{\textbackslash}\%, without requiring labels or retraining.}
+}
+
+@article{humayunPolaritySamplingQuality2022,
+  title = {Polarity {{Sampling}}: {{Quality}} and {{Diversity Control}} of {{Pre-Trained Generative Networks}} via {{Singular Values}}},
+  author = {Humayun, Ahmed Imtiaz and Balestriero, Randall and Baraniuk, Richard},
+  year = {2022},
+  month = jun,
+  journal = {IEEE/CVF Conference on Computer Vision and Pattern Recognition},
+  urldate = {2024-12-16},
+  abstract = {We present Polarity Sampling, a theoretically justified plug-and-play method for controlling the generation quality and diversity of any pre-trained deep generative network (DGN). Leveraging the fact that DGNs are, or can be ap-proximated by, continuous piecewise affine splines, we derive the analytical DGN output space distribution as a function of the product of the DGN's Jacobian singular values raised to a power p. We dub p the polarity param-eter and prove that p focuses the DGN sampling on the modes (p {$<$} 0) or anti-modes (p {$>$} 0) of the DGN output-space probability distribution. We demonstrate that nonzero polarity values achieve a better precision-recall (quality-diversity) Pareto frontier than standard methods, such as truncation, for a number of state-of-the-art DGNs. We also present quantitative and qualitative results on the improve-ment of overall generation quality (e.g., in terms of the Fr{\'e}chet Inception Distance) for a number of state-of-the-art DGNs, including StyleGAN3, BigGAN-deep, NVAE, for different conditional and unconditional image generation tasks. In particular, Polarity Sampling redefines the state-of-the-art for StyleGAN2 on the FFHQ Dataset to FID 2.57, StyleGAN2 on the LSUN Car Dataset to FID 2.27 and Style-GAN3 on the AFHQv2 Dataset to FID 3.95. Colab Demo.}
+}
+
+@inproceedings{humayunProvableInstanceSpecific2023,
+  title = {Provable {{Instance Specific Robustness}} via {{Linear Constraints}}},
+  booktitle = {The {{Second Workshop}} on {{New Frontiers}} in {{Adversarial Machine Learning}}},
+  author = {Humayun, Ahmed Imtiaz and {Casco-Rodriguez}, Josue and Balestriero, Randall and Baraniuk, Richard},
+  year = {2023},
+  month = aug,
+  abstract = {Deep Neural Networks (DNNs) trained for classification tasks are vulnerable to adversarial attacks. But not all the classes are equally vulnerable. Adversarial training does not make all classes or groups equally robust as well. For example, in classification tasks with long-tailed distributions, classes are asymmetrically affected during adversarial training, with lower robust accuracy for less frequent classes. In this regard, we propose a provable robustness method by leveraging the continuous piecewise-affine (CPA) nature of DNNs. Our method can impose linearity constraints on the decision boundary, as well as the DNN CPA partition, without requiring any adversarial training. Using such constraints, we show that the margin between the decision boundary and minority classes can be increased in a provable manner. We also present qualitative and quantitative validation of our method for class-specific robustness.},
+  langid = {english}
+}
+
+@inproceedings{humayunSplineCamExactVisualization2023,
+  title = {{{SplineCam}}: {{Exact Visualization}} and {{Characterization}} of {{Deep Network Geometry}} and {{Decision Boundaries}}},
+  shorttitle = {{{SplineCam}}},
+  booktitle = {Proceedings of the {{IEEE}}/{{CVF Conference}} on {{Computer Vision}} and {{Pattern Recognition}}},
+  author = {Humayun, Ahmed Imtiaz and Balestriero, Randall and Balakrishnan, Guha and Baraniuk, Richard},
+  year = {2023},
+  month = jun,
+  abstract = {Current Deep Network (DN) visualization and inter-pretability methods rely heavily on data space visualizations such as scoring which dimensions of the data are responsible for their associated prediction or generating new data features or samples that best match a given DN unit or representation. In this paper, we go one step further by developing the first provably exact method for computing the geometry of a DN's mapping - including its decision boundary - over a specified region of the data space. By lever-aging the theory of Continuous Piece- Wise Linear (CPWL) spline DNs, SplineCam exactly computes a DN's geometry without resorting to approximations such as sampling or architecture simplification. SplineCam applies to any DN architecture based on CPWL activation nonlinearities, including (leaky) ReLU, absolute value, maxout, and max-pooling and can also be applied to regression DNs such as implicit neural representations. Beyond decision boundary visualization and characterization, SplineCam enables one to compare architectures, measure generalizability, and sample from the decision boundary on or off the data manifold. Project website: bit.ly/splinecam.}
+}
+
+@misc{kingmaAutoEncodingVariationalBayes2022,
+  title = {Auto-{{Encoding Variational Bayes}}},
+  author = {Kingma, Diederik P. and Welling, Max},
+  year = {2022},
+  month = dec,
+  number = {arXiv:1312.6114},
+  eprint = {1312.6114},
+  publisher = {arXiv},
+  doi = {10.48550/arXiv.1312.6114},
+  urldate = {2025-01-11},
+  abstract = {How can we perform efficient inference and learning in directed probabilistic models, in the presence of continuous latent variables with intractable posterior distributions, and large datasets? We introduce a stochastic variational inference and learning algorithm that scales to large datasets and, under some mild differentiability conditions, even works in the intractable case. Our contributions are two-fold. First, we show that a reparameterization of the variational lower bound yields a lower bound estimator that can be straightforwardly optimized using standard stochastic gradient methods. Second, we show that for i.i.d. datasets with continuous latent variables per datapoint, posterior inference can be made especially efficient by fitting an approximate inference model (also called a recognition model) to the intractable posterior using the proposed lower bound estimator. Theoretical advantages are reflected in experimental results.},
+  archiveprefix = {arXiv},
+  keywords = {Computer Science - Machine Learning,Statistics - Machine Learning}
+}
+
+@misc{lejeuneImplicitRugosityRegularization2019,
+  title = {Implicit {{Rugosity Regularization}} via {{Data Augmentation}}},
+  author = {LeJeune, Daniel and Balestriero, Randall and Javadi, Hamid and Baraniuk, Richard G.},
+  year = {2019},
+  month = oct,
+  number = {arXiv:1905.11639},
+  eprint = {1905.11639},
+  publisher = {arXiv},
+  doi = {10.48550/arXiv.1905.11639},
+  urldate = {2024-12-27},
+  abstract = {Deep (neural) networks have been applied productively in a wide range of supervised and unsupervised learning tasks. Unlike classical machine learning algorithms, deep networks typically operate in the {\textbackslash}emph\{overparameterized\} regime, where the number of parameters is larger than the number of training data points. Consequently, understanding the generalization properties and the role of (explicit or implicit) regularization in these networks is of great importance. In this work, we explore how the oft-used heuristic of {\textbackslash}emph\{data augmentation\} imposes an \{{\textbackslash}em implicit regularization\} penalty of a novel measure of the {\textbackslash}emph\{rugosity\} or "roughness" based on the tangent Hessian of the function fit to the training data.},
+  archiveprefix = {arXiv},
+  keywords = {Computer Science - Machine Learning,Statistics - Machine Learning}
+}
+
+@article{mangasarianArbitrarynormSeparatingPlanefn11999,
+  title = {Arbitrary-Norm Separating Planefn1},
+  author = {Mangasarian, O. L.},
+  year = {1999},
+  month = feb,
+  journal = {Operations Research Letters},
+  volume = {24},
+  number = {1},
+  issn = {0167-6377},
+  urldate = {2024-12-11},
+  abstract = {A plane separating two point sets in n-dimensional real space is constructed such that it minimizes the sum of arbitrary-norm distances of misclassified points to the plane. In contrast to previous approaches that used surrogates for distance-minimization, the present work is based on a precise norm-dependent explicit closed form for the projection of a point on a plane. This projection is used to formulate the separating-plane problem as a minimization of a convex function on a unit sphere in a norm dual to that of the arbitrary norm used. For the 1-norm, the problem can be solved in polynomial time by solving 2n linear programs or by solving a bilinear program. For a general p-norm, the minimization problem can be transformed via an exact penalty formulation to minimizing the sum ofa convex function and a bilinear function on a convex set. For the one and infinity norms, a finite successive linearization algorithm can be used for solving the exact penalty formulation.},
+  keywords = {p-norm projection,p-norm separation,Separating plane}
+}
+
+@inproceedings{parkLinearRepresentationHypothesis2024,
+  title = {The Linear Representation Hypothesis and the Geometry of Large Language Models},
+  booktitle = {Forty-{{First International Conference}} on {{Machine Learning}}},
+  author = {Park, Kiho and Choe, Yo Joong and Veitch, Victor},
+  year = {2024}
+}
+
+@inproceedings{rahamanSpectralBiasNeural2018,
+  title = {On the {{Spectral Bias}} of {{Neural Networks}}},
+  booktitle = {International {{Conference}} on {{Machine Learning}}},
+  author = {Rahaman, Nasim and Baratin, A. and Arpit, Devansh and Dr{\"a}xler, Felix and Lin, Min and Hamprecht, F. and Bengio, Yoshua and Courville, Aaron C.},
+  year = {2018},
+  month = jun,
+  urldate = {2024-12-18},
+  abstract = {Neural networks are known to be a class of highly expressive functions able to fit even random input-output mappings with \$100{\textbackslash}\%\$ accuracy. In this work, we present properties of neural networks that complement this aspect of expressivity. By using tools from Fourier analysis, we show that deep ReLU networks are biased towards low frequency functions, meaning that they cannot have local fluctuations without affecting their global behavior. Intuitively, this property is in line with the observation that over-parameterized networks find simple patterns that generalize across data samples. We also investigate how the shape of the data manifold affects expressivity by showing evidence that learning high frequencies gets {\textbackslash}emph\{easier\} with increasing manifold complexity, and present a theoretical understanding of this behavior. Finally, we study the robustness of the frequency components with respect to parameter perturbation, to develop the intuition that the parameters must be finely tuned to express high frequency functions.}
+}
+
+@misc{ronenScaLESScalableLatent2024,
+  title = {{{ScaLES}}: {{Scalable Latent Exploration Score}} for {{Pre-Trained Generative Networks}}},
+  author = {Ronen, Omer and Humayun, Ahmed Imtiaz and Balestriero, Randall and Baraniuk, Richard and Yu, Bin},
+  year = {2024},
+  month = jun,
+  number = {arXiv:2406.09657},
+  eprint = {2406.09657},
+  publisher = {arXiv},
+  doi = {10.48550/arXiv.2406.09657},
+  abstract = {We develop Scalable Latent Exploration Score (ScaLES) to mitigate over-exploration in Latent Space Optimization (LSO), a popular method for solving black-box discrete optimization problems. LSO utilizes continuous optimization within the latent space of a Variational Autoencoder (VAE) and is known to be susceptible to over-exploration, which manifests in unrealistic solutions that reduce its practicality. ScaLES is an exact and theoretically motivated method leveraging the trained decoder's approximation of the data distribution. ScaLES can be calculated with any existing decoder, e.g. from a VAE, without additional training, architectural changes, or access to the training data. Our evaluation across five LSO benchmark tasks and three VAE architectures demonstrates that ScaLES enhances the quality of the solutions while maintaining high objective values, leading to improvements over existing solutions. We believe that new avenues to LSO will be opened by ScaLES ability to identify out of distribution areas, differentiability, and computational tractability. Open source code for ScaLES is available at https://github.com/OmerRonen/scales.},
+  archiveprefix = {arXiv},
+  keywords = {Computer Science - Machine Learning,Statistics - Machine Learning}
+}
+
+@book{spivakCalculusManifoldsModern1965,
+  title = {Calculus {{On Manifolds}}: {{A Modern Approach To Classical Theorems Of Advanced Calculus}}},
+  shorttitle = {Calculus {{On Manifolds}}},
+  author = {Spivak, Michael},
+  year = {1965},
+  publisher = {Avalon Publishing},
+  abstract = {This little book is especially concerned with those portions of ''advanced calculus'' in which the subtlety of the concepts and methods makes rigor difficult to attain at an elementary level. The approach taken here uses elementary versions of modern methods found in sophisticated mathematics. The formal prerequisites include only a term of linear algebra, a nodding acquaintance with the notation of set theory, and a respectable first-year calculus course (one which at least mentions the least upper bound (sup) and greatest lower bound (inf) of a set of real numbers). Beyond this a certain (perhaps latent) rapport with abstract mathematics will be found almost essential.},
+  googlebooks = {g\_EXJtkz7PYC},
+  isbn = {978-0-8053-9021-6},
+  langid = {english},
+  keywords = {Mathematics / Calculus,Mathematics / General,Science / General}
+}
+
+@inproceedings{wangMaxAffineSplinePerspective2019,
+  title = {A {{Max-Affine Spline Perspective}} of {{Recurrent Neural Networks}}},
+  booktitle = {International {{Conference}} on {{Learning Representations}}},
+  author = {Wang, Zichao and Balestriero, Randall and Baraniuk, Richard},
+  year = {2019},
+  abstract = {Semantic Scholar extracted view of "A Max-Affine Spline Perspective of Recurrent Neural Networks" by Zichao Wang et al.}
+}
+
+@article{you2022maxaffine,
+  title = {Max-Affine Spline Insights into Deep Network Pruning},
+  author = {You, Haoran and Balestriero, Randall and Lu, Zhihan and Kou, Yutong and Shi, Huihong and Zhang, Shunyao and Wu, Shang and Lin, Yingyan and Baraniuk, Richard},
+  year = {2022},
+  journal = {Transactions on Machine Learning Research}
+}

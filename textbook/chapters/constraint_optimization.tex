@@ -1,0 +1,100 @@
+\section{Introduction}
+
+By understanding the functional geometry of deep networks and how this relates to their properties we can impose certain properties on deep networks by intervening on this geometry. More specifically, by imposing constraints in the optimization process, one can provide guarantees on the behaviour of a trained network by guaranteeing its functional geometry. Here we explore how this is done in practice and its application to ensuring the robustness of deep networks around training points.
+
+\section{POLICE}\label{sec:police}
+
+Deep networks struggle on optimization problems involving exact constraints, such as $$\begin{cases}\min_{\theta}\left\Vert f_{\theta}-f^*\right\Vert+\lambda\mathcal{R}(\theta)\\f_{\theta}(\mathbf{x})\text{ affine on }R.\end{cases}$$
+
+Let $V=\left(\mathbf{v}_1,\dots,\mathbf{v}_p\right)^\top$ be a matrix of $p$ vertices, such that 
+\begin{equation}\label{eq:region_approx_convex_hull}
+    R\approx\left\{V^\top\alpha:\alpha_j\geq0\,\text{ for all }j\,\text{ and }\alpha^\top\mathbf{1}=1\right\}.
+\end{equation}
+Let $\mathbf{v}_j^{(\ell)}$ be the mapping of the $j^{\text{th}}$ vertex through layers $1$ through $\ell-1$, similarly for $V^{(\ell)}$ and with $\mathbf{v}_j$ corresponding to $\ell=1$.
+
+Henceforth, for simplicity, we will assume that \eqref{eq:region_approx_convex_hull} holds exactly.
+
+\begin{theorem}\label{thm:nec_suf_to_stay_affine}
+    A necessary and sufficient condition for a continuous-piecewise affine spline deep network to stay affine within a region $R$, is to have the same pre-activation sign patterns between the vertices $\mathbf{v}_j$ for every $j=1,\dots,p$ and each layer.
+\end{theorem}
+
+\begin{proof}
+    If $\mathrm{sign}\left(f^{(1)}(\mathbf{v}_i)\right)=\mathrm{sign}\left(f^{(1)}(\mathbf{v}_j)\right)$ for all $i,j\in\{1,\dots,p\}$, then the vertices all lie within the same partition region of $\Omega^{(1)}$. That is, there exists $\omega^*\in\Omega^{(1)}$ such that $v_j\in\omega^*$ for all $j\in\{1,\dots,P\}$. Since, $\omega^*$ is convex due to  Corollary \ref{cor:deep_network_layer_convex_polytopes}, and $R$ is convex by construction, it follows that $R\subseteq\omega^*$. Repeating this for each layer, we arrive at the conclusion that the input-output mapping of the deep network as affine within $R$.
+\end{proof}
+
+\begin{proposition}
+    A sufficient condition for layer $\ell$ to be linear within the input space region given by $R$ is
+    \begin{equation}\label{eq:condition_to_ensure_nec_suf}
+        0\leq\min_{(i,j)\in[p]\times\left[d^{(\ell)}\right]}H_{i,j}s_j,
+    \end{equation}
+    where $H=V^{(\ell)}\left(W^{(\ell)}\right)^\top+\mathbf{1}\left(b^{(\ell)}\right)^\top$ and $$s_j=\begin{cases}\left\vert\left\{i:H_{i,j}>0\right\}\right\vert\geq\frac{p}{2}\\-1&\text{otherwise.}\end{cases}$$
+\end{proposition}
+
+\begin{tproof}
+    The matrix $H\in\mathbb{R}^{[p]\times d^{(\ell)}}$ is simply the pre-activation of layer $\ell$ given input $V^{(\ell)}$. Therefore, by Theorem \ref{thm:nec_suf_to_stay_affine}, it is sufficient to ensure that the rows of $H$ have the same sign pattern. Clearly enforcing \eqref{eq:condition_to_ensure_nec_suf} ensures this, with the construction of $s_j$ meaning that we are enforcing the sign based on majority.
+\end{tproof}
+
+Algorithm \ref{alg:police_train_time}, known as POLICE, implements condition \eqref{eq:condition_to_ensure_nec_suf} at train time to satisfy the condition of Theorem \ref{thm:nec_suf_to_stay_affine} which ensures the affinity of the input-output mapping on $R$. One can similarly implement the condition at test time using Algorithm \ref{alg:police_test_time}.
+
+\begin{algorithm}
+\caption{Provably Optimal Linear Constraint Enforcement. Train time.}\label{alg:police_train_time}
+\begin{algorithmic}
+\Require $X\in\mathbb{R}^{n\times d}$, $V\in\mathbb{R}^{m\times d}$
+\State $V^{(1)}\leftarrow V$.
+\State $X\leftarrow X$.
+\For{$\ell=1,\dots,L$}
+\State $H\leftarrow V^{(\ell)}\left(W^{(\ell)}\right)^\top+\mathbf{1}\left(b^{(\ell)}\right)^\top$.
+\State $s=\text{MajorityVote}\left(\mathrm{sign}(H),\text{axis}=0\right)$
+\State $c=\mathrm{ReLU}\left(-H\mathrm{diag}(s)\right).\max(\text{axis}=0)\odot s$.
+\State $X^{(\ell+1)}\leftarrow\sigma\left(X^{(\ell)}\left(W^{(\ell)}\right)^\top+\mathbf{1}\left(b^{(\ell)}+c\right)^\top\right)$.
+\State $V^{(\ell+1)}\leftarrow\sigma\left(V^{(\ell)}\left(W^{(\ell)}\right)^\top+\mathbf{1}\left(b^{(\ell)}+c\right)^\top\right)$.
+\EndFor
+\end{algorithmic}
+\end{algorithm}
+
+\begin{algorithm}
+\caption{Provably Optimal Linear Constraint Enforcement. Test time.}\label{alg:police_test_time}
+\begin{algorithmic}
+\Require $V\in\mathbb{R}^{m\times d}$
+\State $V^{(1)}\leftarrow V$.
+\For{$\ell=1,\dots,L$}
+\State $H\leftarrow V^{(\ell)}\left(W^{(\ell)}\right)^\top+\mathbf{1}\left(b^{(\ell)}\right)^\top$.
+\State $s=\text{MajorityVote}\left(\mathrm{sign}(H),\text{axis}=0\right)$
+\State $c=\mathrm{ReLU}\left(-H\mathrm{diag}(s)\right).\max(\text{axis}=0)\odot s$.
+\State $V^{(\ell+1)}\leftarrow\sigma\left(V^{(\ell)}\left(W^{(\ell)}\right)^\top+\mathbf{1}\left(b^{(\ell)}+c\right)^\top\right)$.
+\State $b^{(\ell)}\leftarrow b^{(\ell)}+c$.
+\EndFor
+\end{algorithmic}
+\end{algorithm}
+
+\section{Instance Robustness}\label{sec:instance_robustness}
+
+\begin{definition}\label{def:robust}
+    A binary classifier deep network $f$ is $\epsilon$-robust at $\mathbf{x}\in\mathbb{R}^d$ if $$\left\{\mathbf{x}^\prime\in B_{\epsilon}(\mathbf{x}):f\left(\mathbf{x}^\prime\right)\neq f(\mathbf{x})\right\}=\emptyset.$$
+\end{definition}
+
+\begin{remark}
+    \begin{enumerate}
+        \item[]
+        \item Definition \ref{def:robust} is formally saying that the minimum distance of $\mathbf{x}$ from the decision boundary of $f$ is lower bounded in $\ell_2$ norm by $\epsilon$.
+        \item Recall that $$B_{\epsilon}(\mathbf{x})=\left\{\mathbf{x}^\prime:\left\Vert\mathbf{x}^\prime-\mathbf{x}\right\Vert\leq\epsilon\right\}.$$Note that the norm $\Vert\cdot\Vert$ in this instance is unspecified.
+    \end{enumerate} 
+\end{remark}
+
+\begin{theorem}\label{thm:provable_instance_constraint}
+    Consider a binary classifier $f$. For $\mathbf{x}\in\mathbb{R}^d$, if there exists a $d$-polytope containing $\mathbf{x}$ with $p\geq d$ vertices $V=\{\mathbf{v}_j\}_{j=1}^p$ of which $d$ form a basis, such that $\left\Vert\mathbf{v}_j-\mathbf{x}\right\Vert_1>\epsilon$ for each $\mathbf{v}_j\in V$ and 
+    \begin{equation}\label{eq:condition_crop}
+        \left\vert\sum_{j=1}^p\mathrm{sign}\left(\left\langle\left[W^{(L)}\right]_{1,\cdot},f^{(\ell-1)}(\mathbf{v}_j)\right\rangle+\left[b^{(L)}\right]_1\right)\right\vert=p,
+    \end{equation}
+    then $f$ is $\epsilon$-robust in $\ell_1$ norm at $\mathbf{x}$.
+\end{theorem}
+
+\begin{tproof}
+    By construction $B_{\epsilon}(\mathbf{x})\subseteq\mathrm{conv}(V)$. Moreover, \eqref{eq:condition_crop} ensures that the pre-activation pattern between the vertices are the same, so by Theorem \ref{thm:nec_suf_to_stay_affine} we have that the output of the vertices, and in particular $\mathrm{conv}(V)$, are on the same side of the decision boundary. Meaning that the decision $B_{\epsilon}(\mathbf{x})$ remains on the same side of the decision boundary through the mapping, and hence the deep network is $\epsilon$ robust in $\ell_1$ norm.
+\end{tproof}
+
+From Theorem \ref{thm:provable_instance_constraint} its follows that one can use Algorithm \ref{alg:police_train_time} to train a deep network to be $\epsilon$-robust at a particular instance $\mathbf{x}\in\mathbb{R}^d$. By applying constraints to multiple samples and ensuring that the signs off all the constraints are the same, one can train a deep network to be $\epsilon$-robust at multiple samples.
+
+\section{References}
+
+Section \ref{sec:police} from \cite{balestrieroPoliceProvablyOptimal2023}. Section \ref{sec:instance_robustness} from \cite{humayunProvableInstanceSpecific2023}.

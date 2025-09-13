@@ -1,0 +1,310 @@
+\section{Introduction}
+
+With the understanding that deep networks are continuous piecewise linear affine operators, we can translate problems regarding deep networks into the language of spline theory. In this chapter we start to answer some of those questions. In particular, we consider the convexity of deep networks, and explore the necessary conditions for deep networks to be globally convex. We look at deriving bounds for the Lipschitz constant of deep networks. Then we use spline theory to explore the approximation capacity of deep networks, and thus we arrive at a universality result for two-layer deep networks. Furthermore, we interpret the spline formulation of deep networks as a form of template matching.
+
+\section{Convexity}\label{sec:convexity}
+
+\begin{proposition}\label{prop:non_decreasing_property}
+    A deep network layer is non-decreasing with respect to each of its output dimensions if and only if its slope parameters are non-negative.
+\end{proposition}
+
+\begin{tproof}
+    Without loss of generality consider a deep network layer $f^{(\ell)}$ with $d^{(\ell-1)}=1$ and $d^{(\ell)}$. From Proposition \ref{prop:dn_layer_is_maso}, we can write $f^{(\ell)}=S\left[A^{(\ell)},B^{(\ell)}\right]$ for $A^{(\ell)}\in\mathbb{R}^r$ and $B^{(\ell)}\in\mathbb{R}$.\\$(\Rightarrow)$. Since $f^{(\ell)}$ is non-decreasing we have $$\max_{j=1,\dots,r}\left(\left[A^{(\ell)}\right]_jx+B^{(\ell)}\right)\geq\max_{j=1,\dots,r}\left(\left[A^{(\ell)}\right]_jy+B^{(\ell)}\right)$$for any $x\geq y$. Equivalently, $$\max_{j=1,\dots,r}\left(\left[A^{(\ell)}\right]_jx\right)\geq\max_{j=1,\dots,r}\left(\left[A^{(\ell)}\right]_jy\right)$$for any $x\geq y$. Choosing $x=1$ and $y=0$ it follows that 
+    \begin{equation}\label{eq:nondecreasing_inequality_one}
+        \max_{j=1,\dots,r}\left(\left[A^{(\ell)}\right]_j\right)\geq0.
+    \end{equation}
+    Similarly, choosing $x=0$ and $y=-1$, it follows that $$0\geq\max_{j=1,\dots,r}\left(-\left[A^{(\ell)}\right]_j\right),$$which is equivalent to 
+    \begin{equation}\label{eq:nondecreasing_inequality_two}
+        \min_{j=1,\dots,r}\left(\left[A^{(\ell)}\right]_j\right)\geq0.
+    \end{equation}
+    Combining \eqref{eq:nondecreasing_inequality_one} and \eqref{eq:nondecreasing_inequality_two}, it follows that $\left[A^{(\ell)}\right]_j\geq0$ for every $j=1,\dots,r$.\\$(\Leftarrow)$. Let $x\leq y$. Then since $\left[A^{(\ell)}\right]_j\geq0$ for each $j=1,\dots,r$, we have $$\left[A^{(\ell)}\right]_jx\geq\left[A^{(\ell)}\right]_jy$$for every $j=1,\dots,r$. Therefore,
+    \begin{align*}
+        S\left[A^{(\ell)},B^{(\ell)}\right](x)-&S\left[A^{(\ell)},B^{(\ell)}\right](y)\\&=\max_{j=1,\dots,r}\left(\left[A^{(\ell)}\right]_jx+B^{(\ell)}\right)-\max_{j=1,\dots,r}\left(\left[A^{(\ell)}\right]_jy+B^{(\ell)}\right)\\&=\max_{j=1,\dots,r}\left(\left[A^{(\ell)}\right]_jx\right)-\max_{j=1,\dots,r}\left(\left[A^{(\ell)}\right]_jy\right)\\&\geq\max_{j=1,\dots,r}\left(\left[A^{(\ell)}\right]_jx\right)-\max_{j=1,\dots,r}\left(\left[A^{(\ell)}\right]_jx\right)\\&=0.
+    \end{align*}
+    That is, $$S\left[A^{(\ell)},B^{(\ell)}\right](x)\geq S\left[A^{(\ell)},B^{(\ell)}\right],$$meaning that $S$, and thus $f^{(\ell)}$, is non-decreasing.
+\end{tproof}
+
+\begin{theorem}\label{thm:dn_global_convexity}
+    An $L$-layer deep network whose layers $\ell=2,\dots,L$ are piecewise affine, convex and non-decreasing with respect to each of their output dimensions is a max-affine spline operator, and hence convex.
+\end{theorem}
+
+\begin{tproof}
+    We proceed by induction on $L$.
+    \begin{itemize}
+        \item Consider the case $L=2$. For simplicity, let $d^{(2)}=1$. The case of $d^{(2)}>1$ follows similarly since a max-affine spline operator is just the stacking of $d^{(2)}$ max-affine spline units. From Proposition \ref{prop:dn_layer_is_maso}, we have $f^{(1)}(\mathbf{x})=S\left[A^{(1)},B^{(1)}\right]$ for $A\in\mathbb{R}^{d^{(1)}\times r^{(1)}\times d}$, $B^{(1)}\in\mathbb{R}^{r^{(1)}\times d}$ and $f^{(2)}(\mathbf{x})=S\left[A^{(2)},B^{(2)}\right]$ for $A\in\mathbb{R}^{1,r^{(2)},d^{(1)}}$, $B^{(2)}\in\mathbb{R}^{r^{(2)}}$. Hence,
+        \begin{align*}
+            \Big(f^{(2)}&\circ f^{(1)}\Big)(\mathbf{x})\\&=\left(S\left[A^{(2)},B^{(2)}\right]\circ S\left[A^{(1)},B^{(1)}\right]\right)(\mathbf{x})\\&=S\left[A^{(2)},B^{(2)}\right]\left(\begin{pmatrix}\max_{j=1,\dots,r^{(1)}}\left(\left\langle\left[A^{(1)}\right]_{1,j,\cdot},\mathbf{x}\right\rangle+\left[B^{(1)}\right]_{1,j}\right)\\\vdots\\\max_{j=1,\dots,r^{(1)}}\left(\left\langle\left[A^{(1)}\right]_{d^{(1)},j,\cdot},\mathbf{x}\right\rangle+\left[B^{(1)}\right]_{d^{(1)},j}\right)\end{pmatrix}\right)\\&=\max_{j^\prime=1,\dots,r^{(2)}}\left(\left(\left[A^{(2)}\right]_{1,j^\prime,\cdot}\right)^\top\begin{pmatrix}\max_{j=1,\dots,r^{(1)}}\left(\left\langle\left[A^{(1)}\right]_{1,j,\cdot},\mathbf{x}\right\rangle+\left[B^{(1)}\right]_{1,j}\right)\\\vdots\\\max_{j=1,\dots,r^{(1)}}\left(\left\langle\left[A^{(1)}\right]_{d^{(1)},j,\cdot},\mathbf{x}\right\rangle+\left[B^{(1)}\right]_{d^{(1)},j}\right)\end{pmatrix}+\left[B^{(2)}\right]_{j^\prime}\right)\\&=\max_{j^\prime=1,\dots,r^{(2)}}\left(\sum_{i=1}^{d^{(1)}}\left[A^{(2)}\right]_{1,j^\prime,i}\max_{j=1,\dots,r^{(1)}}\left(\left\langle\left[A^{(1)}\right]_{i,j,\cdot},\mathbf{x}\right\rangle+\left[B^{(1)}\right]_{i,j}\right)+\left[B^{(2)}\right]_{j^\prime}\right)\\&\overset{(1)}{=}\max_{j^\prime=1,\dots,r^{(2)}}\max_{j=1,\dots,r^{(1)}}\left(\sum_{i=1}^{d^{(1)}}\left[A^{(2)}\right]_{1,j^\prime,i}\left(\left\langle\left[A^{(1)}\right]_{i,j,\cdot},\mathbf{x}\right\rangle+\left[B^{(1)}\right]_{i,j}\right)+\left[B^{(2)}\right]_{j^\prime}\right)\\&=S\left[A^{(1,2)},B^{(1,2)}\right],
+        \end{align*}
+        where $A^{(1,2)}\in\mathbb{R}^{1\times r^{(2)}r^{(1)}\times d}$ and $B^{(1,2)}\in\mathbb{R}^{r^{(2)}r^{(1)}}$ with $$\begin{cases}\left[A^{(1,2)}\right]_{1,j,\cdot}=\sum_{i=1}^{d^{(\ell)}}\left[A^{(2)}\right]_{1,p+1,i}\left[A^{(1)}\right]_{i,q,\cdot}&j=pr^{(1)}+q\text{ for }p=0,\dots,r^{(2)}-1\text{ and }q\in\left\{1,\dots,r^{(1)}\right\}\\\left[B^{(1,2)}\right]=\left[B^{(2)}\right]_q+\sum_{i=1}^{d^{(\ell)}}\left[B^{(1)}\right]_{i,p}&j=pr^{(1)}+q\text{ for }p=0,\dots,r^{(2)}-1\text{ and }q\in\left\{1,\dots,r^{(1)}\right\}.\end{cases}$$In $(1)$ we have used the non-decreasing property of the second layer to infer $\left[A^{(2)}\right]_{1,j^\prime,i}\geq0$ by Proposition \ref{prop:non_decreasing_property}, allowing us to move it into the maximum operation.
+        \item The inductive step follows the same steps as the base case, with layers one and two replaced with layers $\ell-1$ and $\ell$, where we are assuming the result for layer $\ell-1$.
+    \end{itemize}
+\end{tproof}
+
+\section{Lipschitz}\label{sec:lipschitz}
+
+\textcolor{Red}{the results in the paper may be wrong, so have updated here}
+
+\begin{proposition}\label{prop:deep_network_operator_lipschitz_constants}
+    Let $f^{(\ell)}:\mathbb{R}^{d^{(\ell-1)}}\to\mathbb{R}^{d^{(\ell)}}$ be a deep network operator.
+    \begin{enumerate}
+        \item If $f^{(\ell)}$ is a fully connected operator, then its Lipschitz constant $\kappa^{(\ell)}_{\text{fc}}$ is such that $\kappa^{(\ell)}_{\text{fc}}\leq\left\Vert W^{(\ell)}_{\text{fc}}\right\Vert$.
+        \item If $f^{(\ell)}$ is a convolutional operator, then its Lipschitz constant $\kappa^{(\ell)}_{\text{conv}}$ is such that $\kappa^{(\ell)}_{\text{conv}}\leq\left\Vert\mathbf{C}^{(\ell)}_{\text{conv}}\right\Vert.$
+        \item If $f^{(\ell)}$ is the ReLU, and the absolute value activation operator, then its Lipschitz constant $\kappa^{(\ell)}_{\sigma}\leq\sqrt{d^{(\ell)}}$.
+        \item If $f^{(\ell)}$ is the leaky ReLU activation operator with parameter $\eta>0$, then its Lipschitz constant $\kappa^{(\ell)}_{\sigma}\leq\sqrt{d^{(\ell)}\max\left(\vert\eta\vert,1\right)}$.
+        \item If $f^{(\ell)}$ is the max-pooling or mean-pooling operator, then its Lipschitz constant $\kappa^{(\ell)}_{\rho_{\max}}$ is such that $\kappa^{(\ell)}_{\rho_{\max}}\leq\sqrt{d^{(\ell)}}$.
+    \end{enumerate}
+\end{proposition}
+
+\begin{tproof}
+    \begin{enumerate}
+        \item[]
+        \item This follows directly from 
+        \begin{align*}
+            \left\Vert f^{(\ell)}\left(\mathbf{z}_1\right)-f^{(\ell)}\left(\mathbf{z}_2\right)\right\Vert^2&=\left\Vert W^{(\ell)}_{\text{fc}}\left(\mathbf{z}_1-\mathbf{z}_2\right)\right\Vert^2\\&\leq\left\Vert W^{(\ell)}_{\text{fc}}\right\Vert^2\left\Vert\mathbf{z}_1-\mathbf{z}_2\right\Vert^2.
+        \end{align*}
+        \item This follows directly from 
+        \begin{align*}
+            \left\Vert f^{(\ell)}\left(\mathbf{z}_1\right)-f^{(\ell)}\left(\mathbf{z}_2\right)\right\Vert^2&=\left\Vert\mathbf{C}^{(\ell)}_{\text{fc}}\left(\mathbf{z}_1-\mathbf{z}_2\right)\right\Vert^2\\&\leq\left\Vert\mathbf{C}^{(\ell)}_{\text{fc}}\right\Vert^2\left\Vert\mathbf{z}_1-\mathbf{z}_2\right\Vert^2.
+        \end{align*}
+        \item This follows from utilising statements 1 and 3 of Example \ref{eg:maso_activation_operators} and Proposition \ref{prop:maso_lipschitz} since
+        \begin{align*}
+            \left\Vert f^{(\ell)}\left(\mathbf{z}_1\right)-f^{(\ell)}\left(\mathbf{z}_2\right)\right\Vert^2&\leq\left(\sum_{i=1}^{d^{(\ell)}}\left(\max_{j=1,2}\left\Vert\left[A_{\sigma}\right]_{i,j,\cdot}\right\Vert\right)^2\right)\left\Vert\mathbf{z}_1-\mathbf{z}_2\right\Vert^2\\&=\left(\sum_{j=1}^{d^{(\ell)}}\left\Vert\mathbf{e}_i\right\Vert^2\right)\left\Vert\mathbf{z}_1-\mathbf{z}_2\right\Vert^2\\&\leq d^{(\ell)}\left\Vert\mathbf{z}_1-\mathbf{z}_2\right\Vert^2.
+        \end{align*}
+        \item This follows from utilising statement 2 of Example \ref{eg:maso_activation_operators} and Proposition \ref{prop:maso_lipschitz} since
+        \begin{align*}
+            \left\Vert f^{(\ell)}\left(\mathbf{z}_1\right)-f^{(\ell)}\left(\mathbf{z}_2\right)\right\Vert^2&\leq\left(\sum_{i=1}^{d^{(\ell)}}\left(\max_{j=1,2}\left\Vert\left[A_{\sigma}\right]_{i,j,\cdot}\right\Vert\right)^2\right)\left\Vert\mathbf{z}_1-\mathbf{z}_2\right\Vert^2\\&=\left(\sum_{j=1}^{d^{(\ell)}}\max\left(\vert\eta\vert\left\Vert\mathbf{e}_i\right\Vert,\left\Vert\mathbf{e}_i\right\Vert\right)^2\right)\left\Vert\mathbf{z}_1-\mathbf{z}_2\right\Vert^2\\&\leq d^{(\ell)}\max\left(\vert\eta\vert,1\right)\left\Vert\mathbf{z}_1-\mathbf{z}_2\right\Vert^2.
+        \end{align*}
+        \item This follows from utilising Example \ref{eg:maso_pooling} and Proposition \ref{prop:maso_lipschitz} since
+        \begin{align*}
+            \left\Vert f^{(\ell)}\left(\mathbf{z}_1\right)-f^{(\ell)}\left(\mathbf{z}_2\right)\right\Vert^2&\leq\left(\sum_{i=1}^{d^{(\ell)}}\left(\max_{j=1,\dots,r}\left\Vert\left[A_{\sigma}\right]_{i,j,\cdot}\right\Vert\right)^2\right)\left\Vert\mathbf{z}_1-\mathbf{z}_2\right\Vert^2\\&\leq d^{(\ell)}\left\Vert\mathbf{z}_1-\mathbf{z}_2\right\Vert^2.
+        \end{align*}
+    \end{enumerate}
+\end{tproof}
+
+\begin{proposition}
+    Let $f_{\theta}:\mathbb{R}^d\to\mathbb{R}^{d^{(L)}}$ be a deep network constructed from the composition of $L$ max-affine spline operators. Then a Lipschitz constant $\kappa$ is given by $$\kappa=\prod_{\ell=1}^L\kappa^{(\ell)},$$where each $\kappa^{(\ell)}$ is as given by Proposition \ref{prop:deep_network_operator_lipschitz_constants} depending on the topology of the $\ell^\text{th}$ layer.
+\end{proposition}
+
+\begin{tproof}
+    This follows from the more general statement given in Lemma \ref{lem:lipschitz_constant_composition}.
+
+    \begin{plemma}\label{lem:lipschitz_constant_composition}
+        Let $f_1:\mathbb{R}^d\to\mathbb{R}^{(1)}$ and $f_2:\mathbb{R}^{d^{(1)}}\to\mathbb{R}^{d^{(2)}}$ be functions with Lipschitz constants of $\kappa_1$ and $\kappa_2$ respectively. Then $\kappa_2\kappa_1$ is a Lipschitz constant of $f_1\circ f_2$.
+    \end{plemma}
+
+    \begin{pproof}
+        For $\mathbf{x}_1,\mathbf{x}_2\in\mathbb{R}^d$ observe that
+        \begin{align*}
+            \left\Vert\left(f_2\circ f_1\right)\left(\mathbf{x}_1\right)-\left(f_2\circ f_1\right)\left(\mathbf{x}_2\right)\right\Vert^2&\leq\kappa_2^2\left\Vert f_1\left(\mathbf{x}_1\right)-f_1\left(\mathbf{x}_2\right)\right\Vert^2\\&\leq\kappa_2^2\kappa_1^2\left\Vert\mathbf{x}_1-\mathbf{x}_2\right\Vert^2.
+        \end{align*}
+    \end{pproof}
+\end{tproof}
+
+\section{Universality}\label{sec:universality}
+
+Although we have been considering deep networks with piecewise affine and convex operators, these are sufficient from an approximation perspective.
+
+\begin{theorem}\label{thm:universality}
+    Let $f:\mathbb{R}^d\to\mathbb{R}^c$ be a continuous operator, and let $f_{\theta}$ be a deep network with parameters $\theta$ constructed from the composition of two max-affine spline operators with $r^{(1)}=2$ and $r^{(2)}=1$. Then there exists parameters $\theta$ such that $$\left\Vert f(\mathbf{x})-f_{\theta}(\mathbf{x})\right\Vert_2^2\leq\frac{\sum_{j=1}^c\eta_j}{d^{(1)}},$$where $\eta_j$ characterises the regularity of the $j^\text{th}$ output of $f$.
+\end{theorem}
+
+\begin{tproof}
+    Due to the independence the max-affine spline units constituting the layer operators, we can consider the approximation in each dimension independently. Observe that 
+    \begin{align*}
+        \left[f_{\theta}(\mathbf{x})\right]_j&=\left[W_{\text{fc}}^{(2)}f_{\theta}^{(1)}(\mathbf{x})+b_{\text{fc}}^{(2)}\right]_j\\&=\sum_{i=1}^{d^{(1)}}\left[W_{\text{fc}}^{(2)}\right]_{j,i}\left[f_{\theta}^{(1)}(\mathbf{x})\right]_i+\left[b_{\text{fc}}^{(2)}\right]_j.
+    \end{align*}
+    Since $r^{(1)}=2$, it follows that $\left[f_{\theta}(\mathbf{x})\right]_j$ is the sum of $d^{(1)}$ hinge functions, where we are assuming the terminology of \citet{breimanHingingHyperplanesRegression1993}. Using Theorem 3 from \citet{breimanHingingHyperplanesRegression1993}, there exists parameters such that $$\left\vert\left[f(\mathbf{x})\right]_j-\left[f_{\theta}(\mathbf{x})\right]_i\right\vert^2\leq\frac{\eta_i}{d^{(1)}}.$$Therefore,
+    \begin{align*}
+        \left\Vert f(\mathbf{x})-f_{\theta}(\mathbf{x})\right\Vert_2^2&=\sum_{j=1}^{c}\left\vert\left[f(\mathbf{x})\right]_j-\left[f_{\theta}(\mathbf{x})\right]_j\right\vert^2\\&\leq\frac{\sum_{j=1}^c\eta_j}{d^{(1)}}.
+    \end{align*}
+\end{tproof}
+
+\textcolor{Red}{generalise this to deeper networks}
+
+\begin{corollary}
+    A deep network containing non-piecewise affine and/or non-convex operators can be approximated arbitrarily closely by a max-affine spline operator based deep network.
+\end{corollary}
+
+\section{Template Matchers}\label{sec:template_matchers}
+
+\subsection{Filter Template Matching}
+
+Recall \eqref{eq:collapse_of_cnn_formulation}, where we collapsed the convolutional neural network operation, allowing for the interpretation that the operation is a signal-dependent affine featurization of a signal $\mathbf{x}$ into linear extractable features. More generally, we consider\footnote{Recall the notation convention from statement 2 of Remark \ref{rem:affine_spline}.} 
+\begin{equation}\label{eq:matched_filterbank}
+    \mathbf{z}^{(L)}(\mathbf{x})=\left(W_{\text{fc}}^{(L)}A[\mathbf{x}]\right)\mathbf{x}+\left(W^{(L)}B[\mathbf{x}]+b_{\text{fc}}^{(L)}\right).
+\end{equation}
+From here we gain the alternative interpretation that the output of a deep network is a bank of linear matched filters with a set of biases. More specifically, given an input $\mathbf{x}$, the chosen filter, or class, is given by the index of the largest element of $\mathbf{z}^{(L)}(\mathbf{x})$.
+
+Accounting for the intermediate layer computations of the deep networks, leads to the more fine-grained interpretation that deep networks are performing hierarchical template matching, 
+\begin{align}\label{eq:hierarchical_template_matching}
+    \mathbf{z}^{(L)}(\mathbf{x})=&W_{\text{fc}}^{(L)}\max_{j_{(L-1)}=1,\dots,r^{(L-1)}}\bigg(A_{\cdot,r^{(L-1)},\cdot}^{(L-1)}\dots A^{(2)}_{\cdot,j_{(2)},\cdot}\nonumber\\&\cdot\max_{j=1,\dots,r^{(1)}}\left(\left[A^{(1)}\right]_{\cdot,j_{(1)},\cdot}\mathbf{x}+\left[B^{(1)}\right]_{j_(1),\cdot}\right)+\dots+\left[B^{(L-1)}\right]_{j_{(L-1)},\cdot}\bigg)+b_{\text{fc}}^{(L)}.
+\end{align}
+
+More specifically, we observe that the template matching is greedy, which is a computationally efficient yet sub-optimal template matching technique. It is only optimal when the deep network is convex.
+
+\begin{corollary}
+    For a deep network satisfying the conditions of Theorem \ref{thm:dn_global_convexity}, the computation \eqref{eq:hierarchical_template_matching} collapses to $$\mathbf{z}^{(L)}(\mathbf{x})=W_{\text{fc}}^{(L)}\max_{j_{(L-1)}=1,\dots,r^{(L-1)};\dots;j_{(1)}=1,\dots,r^{(1)}}\left(A^{(L-1)}\left(\dots A^{(2)}_{j_{(2)}}\left(A^{(1)}_{j_{(1)}}\mathbf{x}+B^{(1)}_{j_{(1)}}\right)+B^{(2)}_{j_{(2)}}\right)+\dots+B^{(L-1)}_{j_{(L-1)}}\right)+b_{\text{fc}}^{(L)},$$which is globally optimal template matching.
+\end{corollary}
+
+\subsection{Filter Template versus Bias}
+
+A large positive or negative bias -- at any intermediate layer in \eqref{eq:hierarchical_template_matching} -- can dominate the filter match computations. This can either be induced by poor initialisation schemes or be as a consequence of the difference in batch norm implementation during training and during inference.
+
+\subsection{Collinear Templates}
+
+In the matched filterbank interpretation \eqref{eq:matched_filterbank}, the optimal template for input $\mathbf{x}$ of class $c$ is a scaled version of $\mathbf{x}$. In a particular setting, the optimal templates for the other incorrect classes is provided by Proposition \ref{prop:optimal_filters}.
+
+\begin{proposition}\label{prop:optimal_filters}
+    Let $\mathcal{D}=\left\{\left(\mathbf{x}_n,y_n\right)\right\}_{i=1}^n$ be a training dataset with $c$ classes and $\left\Vert\mathbf{x}_j\right\Vert_2=1$ for $j=1,\dots,n$. Consider a deep network $f_{\theta}$ with sufficient approximation power to span arbitrary slope matrix in \eqref{eq:matched_filterbank} for any input $\mathbf{x}_j$ with $j=1,\dots,n$. Suppose the deep network is trained using the cross-entropy loss $\mathcal{L}_{\text{CE}}:\mathbb{R}\times\mathbb{R}\to\mathbb{R}_{\geq0}$ with a regularisation constrain of $\sum_{i=1}^c\left\Vert A\left[\mathbf{x}_n\right]_{i,\cdot}\right\Vert_2<\alpha$ for some $\alpha>0$. At the global minimum of the optimization problem $A^{\star}$, the optimal templates take the form $$\left[A^{\star}\left[\mathbf{x}_j\right]\right]_{i,\cdot}=\begin{cases}\sqrt{\frac{(c-1)\alpha}{c}}\mathbf{x}_j&i=y_j\\-\sqrt{\frac{\alpha}{c(c-1)}}\mathbf{x}_j&i\neq y_j.\end{cases}$$
+\end{proposition}
+
+\begin{tproof}
+    The loss function is convex on a convex set, thus it is sufficient to find an extremum point to solve the optimization problem. The augmented loss with the Lagrange multiple is 
+    \begin{align*}
+        l\left(\left[A[\mathbf{x}_j]\right]_{1,\cdot},\cdot,\left[A[\mathbf{x}_j]\right]_{c,\cdot},\lambda\right)=&-\left\langle\left[A[\mathbf{x}_j]\right]_{y_j,\cdot},\mathbf{x}_j\right\rangle\\&+\log\left(\sum_{i=1}^c\exp\left(\left\langle\left[A[\mathbf{x}_j]\right]_{i,\cdot},\mathbf{x}_j\right\rangle\right)\right)-\lambda\left(\sum_{i=1}^c\left\Vert\left[A[\mathbf{x}_j]\right]_{i,\cdot}\right\Vert^2-\alpha\right).
+    \end{align*}
+    The sufficient Karush–Kuhn–Tucker conditions are thus $$\begin{cases}\frac{\partial l}{\partial\left[A\left[\mathbf{x}_j\right]\right]_{1,\cdot}}=-\mathbf{1}_{\{y_j=1\}}\mathbf{x}_j+\frac{\exp\left(\left\langle\left[A\left[\mathbf{x}_j\right]\right]_{1,\cdot},\mathbf{x}_j\right\rangle\right)}{\sum_{i=1}^c\exp\left(\left\langle\left[A\left[\mathbf{x}_j\right]\right]_{i,\cdot},\mathbf{x}_j\right\rangle\right)}-2\lambda\left[A\left[\mathbf{x}_j\right]\right]_{1,\cdot}=\mathbf{0}\\\vdots\\\frac{\partial l}{\partial\left[A\left[\mathbf{x}_j\right]\right]_{c,\cdot}}=-\mathbf{1}_{\{y_j=c\}}\mathbf{x}_j+\frac{\exp\left(\left\langle\left[A\left[\mathbf{x}_j\right]\right]_{c,\cdot},\mathbf{x}_j\right\rangle\right)}{\sum_{i=1}^c\left\langle\exp\left(\left[A\left[\mathbf{x}_j\right]\right]_{i,\cdot},\mathbf{x}_j\right\rangle\right)}-2\lambda\left[A\left[\mathbf{x}_j\right]\right]_{1,\cdot}=\mathbf{0}\\\frac{\partial l}{\partial\lambda}=\alpha-\sum_{i=1}^c\left\Vert\left[A\left[\mathbf{x}_j\right]\right]_{i,\cdot}\right\Vert^2=0.\end{cases}$$From the first $c$ conditions it follows that
+    \begin{align*}
+        0&=\sum_{i=1}^c\left[A\left[\mathbf{x}_j\right]\right]^\top_{i,\cdot}\frac{\partial l}{\partial\left[A\left[\mathbf{x}_j\right]\right]_{i,\cdot}}\\&=-\left\langle\left[A\left[\mathbf{x}_j\right]\right]_{y_j,\cdot},\mathbf{x}_j\right\rangle+\sum_{i=1}^c\frac{\exp\left(\left\langle\left[A\left[\mathbf{x}_j\right]\right]_{i,\cdot},\mathbf{x}_j\right\rangle\right)}{\sum_{t=1}^c\exp\left(\left\langle\left[A\left[\mathbf{x}_j\right]\right]_{t,\cdot},\mathbf{x}_j\right\rangle\right)}\left\langle\left[A\left[\mathbf{x}_j\right]\right]_{i,\cdot},\mathbf{x}_j\right\rangle-2\lambda\sum_{i=1}^c\left\Vert\left[A\left[\mathbf{x}_j\right]\right]_{i,\cdot}\right\Vert^2.
+    \end{align*}
+    Therefore, using the $(c+1)^{\text{th}}$ condition it follows that $$\lambda=\frac{1}{2\alpha}\left(\sum_{i=1}^c\frac{\exp\left(\left\langle\left[A\left[\mathbf{x}_j\right]\right]_{i,\cdot},\mathbf{x}_j\right\rangle\right)}{\sum_{t=1}^c\exp\left(\left\langle\left[A\left[\mathbf{x}_j\right]\right]_{t,\cdot},\mathbf{x}_j\right\rangle\right)}\left\langle\left[A\left[\mathbf{x}_j\right]\right]_{i,\cdot},\mathbf{x}_j\right\rangle-\left\langle\left[A\left[\mathbf{x}_j\right]\right]_{y_j,\cdot},\mathbf{x}_j\right\rangle\right).$$Substituting this into the $k^\text{th}$ condition for $k\in\{1,\dots,c\}$ we obtain 
+    \begin{align*}
+        \frac{\partial l}{\partial\left[A\left[\mathbf{x}_j\right]\right]_{k,\cdot}}=&-\mathbf{1}_{\{y_j=k\}}\mathbf{x}_j+\frac{\exp\left(\left\langle\left[A\left[\mathbf{x}_j\right]\right]_{k,\cdot},\mathbf{x}_j\right\rangle\right)}{\sum_{i=1}^c\left\langle\exp\left(\left[A\left[\mathbf{x}_j\right]\right]_{i,\cdot},\mathbf{x}_j\right\rangle\right)}\\&-\frac{1}{\alpha}\sum_{i=1}^c\frac{\exp\left(\left\langle\left[A\left[\mathbf{x}_j\right]\right]_{i,\cdot},\mathbf{x}_j\right\rangle\right)}{\sum_{t=1}^c\exp\left(\left\langle\left[A\left[\mathbf{x}_j\right]\right]_{t,\cdot},\mathbf{x}_j\right\rangle\right)}\left\langle\left[A\left[\mathbf{x}_j\right]\right]_{i,\cdot},\mathbf{x}_j\right\rangle\left[A\left[\mathbf{x}_j\right]\right]_{k,\cdot}.
+    \end{align*}
+    Noting that $\left[A\left[\mathbf{x}_j\right]\right]_{i,\cdot}=\left[A\left[\mathbf{x}_j\right]\right]_{t,\cdot}$ for $i,t\neq y_j$, we can simplify this to 
+    \begin{align*}
+        \frac{\partial l}{\partial\left[A\left[\mathbf{x}_j\right]\right]_{k,\cdot}}=&\left(\frac{\exp\left(\left\langle\left[A\left[\mathbf{x}_j\right]\right]_{k,\cdot},\mathbf{x}_j\right\rangle\right)}{\sum_{t=1}^c\exp\left(\left\langle\left[A\left[\mathbf{x}_j\right]\right]_{t,\cdot},\mathbf{x}_j\right\rangle\right)}-\mathbf{1}_{\{k=y_j\}}\right)\mathbf{x}_j\\&+\frac{c-1}{\alpha}\frac{\exp\left(\left\langle\left[A\left[\mathbf{x}_j\right]\right]_{i,\cdot},\mathbf{x}_j\right\rangle\right)}{\sum_{t=1}^c\exp\left(\left\langle\left[A\left[\mathbf{x}_j\right]\right]_{t,\cdot},\mathbf{x}_j\right\rangle\right)}\left\langle\left[A\left[\mathbf{x}_j\right]\right]_{y_j,\cdot}-\left[A\left[\mathbf{x}_j\right]\right]_{i,\cdot},\mathbf{x}_j\right\rangle\left[A\left[\mathbf{x}_j\right]\right]_{k,\cdot},
+    \end{align*}
+    where $i\neq y_j$. We can now substitute in the proposed global optimum $A^{\star}$ to confirm that it is the unique extremum point which is the global optimum. Maintaining that $i\neq y_j$, in the case $k=y_j$ we have
+    \begin{align*}
+        \frac{\partial l}{\partial\left[A\left[\mathbf{x}_j\right]\right]_{y_j,\cdot}}&=\frac{c-1}{\alpha}\frac{\exp\left(\left\langle\left[A\left[\mathbf{x}_j\right]\right]_{i,\cdot},\mathbf{x}_j\right\rangle\right)}{\sum_{t=1}^c\exp\left(\left\langle\left[A\left[\mathbf{x}_j\right]\right]_{t,\cdot},\mathbf{x}_j\right\rangle\right)}\left(-\alpha\mathbf{x}_j+\left\langle\left[A\left[\mathbf{x}_j\right]\right]_{y_j,\cdot}-\left[A\left[\mathbf{x}_j\right]\right]_{i,\cdot},\mathbf{x}_j\right\rangle\left[A\left[\mathbf{x}_j\right]\right]_{y_j,\cdot}\right)\\&=\frac{c-1}{\alpha}\frac{\exp\left(\left\langle\left[A\left[\mathbf{x}_j\right]\right]_{i,\cdot},\mathbf{x}_j\right\rangle\right)}{\sum_{t=1}^c\exp\left(\left\langle\left[A\left[\mathbf{x}_j\right]\right]_{t,\cdot},\mathbf{x}_j\right\rangle\right)}\left(-\alpha\mathbf{x}_j+\alpha\left\Vert\mathbf{x}_j\right\Vert^2\mathbf{x}_j\right)\\&=0.
+    \end{align*}
+    In the case $k\neq y_j$ we have
+    \begin{align*}
+        \frac{\partial l}{\partial\left[A\left[\mathbf{x}_j\right]\right]_{i,\cdot}}&=\frac{\exp\left(\left\langle\left[A\left[\mathbf{x}_j\right]\right]_{i,\cdot},\mathbf{x}_j\right\rangle\right)}{\sum_{t=1}^c\exp\left(\left\langle\left[A\left[\mathbf{x}_j\right]\right]_{t,\cdot},\mathbf{x}_j\right\rangle\right)}\left(\mathbf{x}_j+\frac{c-1}{\alpha}\left\langle\left[A\left[\mathbf{x}_j\right]\right]_{y_j,\cdot}-\left[A\left[\mathbf{x}_j\right]\right]_{i,\cdot},\mathbf{x}_j\right\rangle\left[A\left[\mathbf{x}_j\right]\right]_{i,\cdot}\right)\\&=\frac{\exp\left(\left\langle\left[A\left[\mathbf{x}_j\right]\right]_{i,\cdot},\mathbf{x}_j\right\rangle\right)}{\sum_{t=1}^c\exp\left(\left\langle\left[A\left[\mathbf{x}_j\right]\right]_{t,\cdot},\mathbf{x}_j\right\rangle\right)}\left(\mathbf{x}_j-\left\Vert\mathbf{x}_j\right\Vert^2\mathbf{x}_j\right)\\&=0.
+    \end{align*}
+    Even though we have only considered $\mathbf{x}_j$ in the above analysis, minimising the per-example loss also minimises the dataset loss.
+\end{tproof}
+
+\begin{remark}
+    Proposition \ref{prop:optimal_filters} shows that an idealized deep network will memorize a set of collinear templates from the training set.
+\end{remark}
+
+\subsection{Orthogonal Templates}
+
+The signal-dependent matched filterbank computation of a deep network \eqref{eq:matched_filterbank}, is optimal for classifying signals immersed in additive white Gaussian noise. However, in practice, noise will be introduced from nuanced sources, affecting the optimality of this approach. Using orthogonal templates is a method of addressing this issue.
+
+For the templates of a deep network with max-affine spline operator layers to be orthogonal, it is necessary that the rows of the $W^{(L)}_{\text{fc}}$ are orthogonal. To promote this property during training one can add a regularisation term to the cross-entropy loss function $\mathcal{L}_{\text{CE}}$. More specifically, during training one can use the loss function $$\mathcal{L}_{\text{CE}}+\lambda\sum_{i_1\neq i_2}\left\vert\left\langle\left[W^{(L)}_{\text{fc}}\right]_{i_1,\cdot},\left[W_{\text{fc}}^{(L)}\right]_{i_2,\cdot}\right\rangle\right\vert^2.$$
+
+\section{Input Space Partitioning}\label{sec:input_space_partitioning}
+
+\subsection{Max-Affine Spline Partition}
+
+The max-affine spline operator at layer $\ell$ of a deep network directly partitions its input $\mathbb{R}^{d^{(\ell-1)}}$ as $\Omega^{(\ell)}$ constituting $r^{(\ell)}$ regions. More specifically, each unit of the operator induces a partition on $\mathbb{R}^{d^{(\ell)}}$. Let $\omega_{i,j}^{(\ell)}$ denote the $j^\text{th}$ region, out of $r^{(\ell)}_i$, induced by the $i^\text{th}$ unit of the max-affine spline operator at layer $\ell$ of the deep network. Then $$\Omega^{(\ell)}=\bigcup_{j_1=1}^{r^{(\ell)}_1}\dots\bigcup_{j_{d^{(\ell)}}}^{r^{(\ell)}_{d^{(\ell)}}}\bigcap_{i=1}^{d^{(\ell)}}\omega_{i,j_i}^{(\ell)}.$$
+
+\begin{example}\label{eg:operator_induced_regions}
+    \begin{enumerate}
+        \item[]
+        \item For the leaky ReLU activation operator, recall that $r_i^{(\ell)}=2$ for each $i=1,\dots,d^{(\ell)}$. In particular, we have $$\begin{cases}\omega^{(\ell)}_{i,1}=\left\{\mathbf{z}^{(\ell-1)}(\mathbf{x})\in\mathbb{R}^{d^{(\ell-1)}}:\left[\sigma_{\text{LReLU}}\left(\mathbf{z}^{(\ell-1)}(\mathbf{x})\right)\right]_i\leq0\right\}\\\omega^{(\ell)}_{i,2}=\left\{\mathbf{z}^{(\ell-1)}(\mathbf{x})\in\mathbb{R}^{d^{(\ell-1)}}:\left[\sigma_{\text{LReLU}}\left(\mathbf{z}^{(\ell-1)}(\mathbf{x})\right)\right]_i>0\right\}\end{cases}$$for $i=1,\dots,d^{(\ell)}$.
+        \item For the max-pooling operator, we have $$\begin{cases}\omega_{i,1}^{(\ell)}=\left\{\mathbf{z}^{(\ell-1)}(\mathbf{x})\in\mathbb{R}^{d^{(\ell-1)}}:\argmax_{t\in\mathcal{R}^{(\ell)}_i}\left[\mathbf{z}^{(\ell-1)}(\mathbf{x})\right]_t=1\right\}\\\vdots\\\omega_{i,\left\vert\mathcal{R}^{(\ell)}_i\right\vert}=\left\{\mathbf{z}^{(\ell-1)}(\mathbf{x})\in\mathbb{R}^{d^{(\ell)}}:\argmax_{t\in\mathcal{R}^{(\ell)}_i}\left[\mathbf{z}^{(\ell-1}(\mathbf{x})\right]_t=\left\vert\mathcal{R}_i^{(\ell)}\right\vert\right\}\end{cases}$$for $i=1,\dots,d^{(\ell)}$.
+    \end{enumerate}
+\end{example}
+
+Generally speaking, for the max-affine spline operator $S\left[A^{(\ell)},B^{(\ell)}\right]:\mathbb{R}^{d^{(\ell-1)}}\to\mathbb{R}^{d^{(\ell)}}$ we have $$\omega^{(\ell)}_{i,j}=\left\{\mathbf{z}^{(\ell-1)}\in\mathbb{R}^{d^{(\ell-1)}}:\argmax_{t=1,\dots,r^{(\ell)}_i}\left[S\left[\mathbf{z}^{(\ell-1)}\right]\right]_i=j\right\}.$$
+
+Let $T_H^{(\ell)}\in\mathbb{R}^{d^{(\ell)}\times r^{(\ell)}}$ be given by $$\left[T^{(\ell)}_H\mathbf{z}^{(\ell-1)}(\mathbf{x})\right]_{i,j}=\frac{\partial}{\partial\left(\left\langle\left[A^{(\ell)}\right]_{i,j},\mathbf{z}^{(\ell-1)}(\mathbf{x})\right\rangle+\left[B^{(\ell)}\right]_{i,j}\right)}\left(\max_{t=1,\dots,r^{(\ell)}}\left(\left\langle\left[A^{(\ell)}\right]_{i,t},\mathbf{z}^{(\ell-1)}(\mathbf{x})\right\rangle+\left[B^{(\ell)}\right]_{i,t}\right)\right).$$
+
+\begin{proposition}
+    We have $$\omega^{(\ell)}_{i,j}=\left\{\mathbf{z}^{(\ell-1)}(\mathbf{x})\in\mathbb{R}^{d^{(\ell-1)}}:\left[T^{(\ell)}_H\mathbf{z}^{(\ell-1)}(\mathbf{x})\right]_{i,j}=1\right\}.$$
+\end{proposition}
+
+\subsection{Deep Network Partition}
+
+The partition on the input domain $\mathbb{R}^d$, due to the $\ell^{\text{th}}$ is formed by pulling back the partition $\Omega^{(\ell)}$ onto $\mathbb{R}^d$. In particular, $$\Omega^{(1\leftarrow\ell)}=\bigcup_{j_1=1}^{r_1^{(\ell)}}\dots\bigcup_{j_{d^{(\ell)}}}^{r_{d^{(\ell)}}}\bigcap_{i=1}^{d^{(\ell)}}\omega_{i,j_i}^{(1\leftarrow\ell)},$$where $$\omega^{(1\leftarrow\ell)}_{i,j_i}=\left\{\mathbf{x}\in\mathbb{R}^d:\left[T_H^{(\ell)}\left(\mathbf{z}^{(\ell-1)}(\mathbf{x})\right)\right]_{i,j_i}=1\right\}.$$Therefore, the partition induced by the entire deep network on the input space $\Omega$ is given by $$\Omega=\bigcap_{\ell^\prime=1}^L\Omega^{\left(1\leftarrow\ell^\prime\right)}.$$
+
+This characterisation of regions in the underlying partition hints at a simplified notation. More specifically, there is a one-to-one correspondence between regions in $\Omega^{(\ell)}$ and vectors $$\mathbf{t}^{(\ell)}\in\left\{1,\dots,r_1^{(\ell)}\right\}\times\dots\times\left\{1,\dots,r_{d^{(\ell)}}^{(\ell)}\right\},$$so that
+\begin{align*}
+    \Omega^{(\ell)}&=\bigcup_{\mathbf{t}^{(\ell)}}\bigcap_{j=1}^{d^{(\ell)}}\omega_{i,\left[\mathbf{t}^{(\ell)}\right]_i}^{(\ell)}\\&=:\bigcup_{\mathbf{t}^{(\ell)}}\omega^{(\ell)}_{\mathbf{t}^{(\ell)}}
+\end{align*}
+Consequently, it follows that $\Omega^{(\ell)}$ can have at most $\prod_{i=1}^{d^{(\ell)}}r_i^{(\ell)}$ regions. We can extend this naturally to the deep network partition as $$\Omega=\bigcup_{\mathbf{t}=\left[\mathbf{t}^{(1)},\dots,\mathbf{t}^{(L)}\right]}\omega_{\mathbf{t}},$$where $$\omega_{\mathbf{t}}=\bigcap_{\ell^=1}^{L}\omega^{(1\leftarrow\ell)}_{\mathbf{t}^{(\ell)}}.$$
+
+For deep networks implementing exclusively ReLU, leaky ReLU or absolute value activations operators, we adopt a slightly altered convention to streamline future computational implementations. Namely, we characterise regions with $\mathbf{s}=\left[\mathbf{s}^{(1)},\dots,\mathbf{s}^{(L)}\right]$ where $\mathbf{s}^{(\ell)}\in\{-1,1\}^{d^{(\ell)}}$ so that
+
+let \begin{align}\label{eq:layer_partition_relu}
+    \Omega^{(\ell)}&=\bigcup_{\mathbf{s}^{(\ell)}\in\{-1,1\}^{d^{(\ell)}}}\bigcap_{j=1}^{d^{(\ell)}}\left\{\mathbf{z}^{(\ell-1)}\in\mathbb{R}^{d^{(\ell-1)}}:\left(\left\langle\left[W^{(\ell)}\right]_{j,\cdot},\mathbf{z}^{(\ell-1)}\right\rangle+\left[b^{(\ell)}\right]_j\right)\mathbf{s}^{d^{(\ell)}}_j\leq0\right\}\nonumber\\&=:\bigcup_{\mathbf{s}^{(\ell)}\in\{-1,1\}^{d^{(\ell)}}}\omega^{(\ell)}_{\mathbf{s}^{(\ell)}},
+\end{align}
+and $$\Omega=\bigcup_{\mathbf{s}=\left[\mathbf{s}^{(1)},\dots,\mathbf{s}^{(L)}\right]}\omega_{\mathbf{s}}$$as before.
+
+\begin{remark}
+    For $\mathbf{z}^{(\ell-1)}\in\mathbb{R}^{d^{(\ell)}}$, we'll let $\mathbf{t}^{(\ell)}\left(\mathbf{z}^{(\ell-1)}\right)$ be such that $\mathbf{z}^{(\ell-1)}\in\omega^{(\ell)}_{\mathbf{t}^{(\ell)}\left(\mathbf{z}^{(\ell-1)}\right)}$. Similarly, for $\mathbf{x}\in\mathbb{R}^d$ we'll let $\mathbf{t}(\mathbf{x})=\left[\mathbf{t}^{(1)}\left(\mathbf{x}\right),\dots,\mathbf{t}^{(L)}\left(\mathbf{z}^{(L-1)}\right)\right]$.
+\end{remark}
+
+\subsection{Functional Decomposition}
+
+By construction a deep network is an affine transformation on the regions of $\Omega$, thus we can use these regions to decompose the function of a deep network into a series of affine transformation.
+
+Let $f$ be a deep network. The $\ell^\text{th}$ layer of the network can be written as a max-affine spline operator $S\left[A^{(\ell)},B^{(\ell)}\right]$. In particular, 
+\begin{align}\label{eq:functional_decomposition_layer_operator}
+    f^{(\ell)}\left(\mathbf{z}^{(\ell-1)}\right)&=S\left[A^{(\ell)},B^{(\ell)}\right]\left(\mathbf{z}^{(\ell-1)}\right)\nonumber\\&=\sum_{\omega^{(\ell)}\in\Omega^{(\ell)}}\left(A_{\omega^{(\ell)}}^{(\ell)}\mathbf{z}^{(\ell-1)}+b_{\omega^{(\ell)}}^{(\ell)}\right)\mathbf{1}_{\left\{\mathbf{z}^{(\ell-1)}\in\omega^{(\ell)}\right\}}\nonumber\\&=\sum_{\mathbf{t}^{(\ell)}}\left(A_{\omega^{(\ell)}_{\mathbf{t}^{(\ell)}}}^{(\ell)}\mathbf{z}^{(\ell-1)}+b_{\omega^{(\ell)}_{\mathbf{t}^{(\ell)}}}^{(\ell)}\right)\mathbf{1}_{\left\{\mathbf{z}^{(\ell-1)}\in\omega^{(\ell)}_{\mathbf{t}^{(\ell)}}\right\}},
+\end{align}
+so that $f_{\omega^{(\ell)}}^{(\ell)}\left(\mathbf{z}^{(\ell-1)}\right):=A_{\omega^{(\ell)}}^{(\ell)}\mathbf{z}^{(\ell-1)}+b_{\omega^{(\ell)}}^{(\ell)}$ is the affine transformation acting on $\omega^{(\ell)}\in\Omega^{(\ell)}$.
+
+Therefore, 
+\begin{align}\label{eq:functional_decomposition_deep_network}
+    f(\mathbf{x})&=\sum_{\mathbf{t}=\left[\mathbf{t}^{(1)},\dots,\mathbf{t}^{(L)}\right]}\left(f^{(L)}_{\omega^{(L)}_{\mathbf{t}^{(L)}}}\circ\dots\circ f^{(1)}_{\omega^{(1)}_{\mathbf{t}^{(1)}}}\right)(\mathbf{x})\mathbf{1}_{\left\{\mathbf{x}\in\omega_{\mathbf{t}}\right\}}\nonumber\\&=:\sum_{\mathbf{t}=\left[\mathbf{t}^{(1)},\dots,\mathbf{t}^{(L)}\right]}\left(A_{\omega_{\mathbf{t}}}\mathbf{x}+b_{\omega_{\mathbf{t}}}\right)\mathbf{1}_{\left\{\mathbf{x}\in\omega_{\mathbf{t}}\right\}}\nonumber\\&=:\sum_{\mathbf{t}=\left[\mathbf{t}^{(1)},\dots,\mathbf{t}^{(L)}\right]}f_{\omega_{\mathbf{t}}}(\mathbf{x})\mathbf{1}_{\left\{\mathbf{x}\in\omega_{\mathbf{t}}\right\}}.
+\end{align}
+
+\begin{proposition}\label{prop:expanding_dn_parameters_with_layer_parameters}
+    The parameters $A_{\omega_{\mathbf{t}}}$ and $b_{\omega_{\mathbf{t}}}$ from \eqref{eq:functional_decomposition_deep_network} are given by $$A_{\omega_{\mathbf{t}}}=\prod_{\ell=L}^{1}A^{(\ell)}_{\omega_{\mathbf{t}^{(\ell)}}}$$and$$b_{\omega_{\mathbf{t}}}=b^{(L)}_{\omega_{\mathbf{t}^{(L)}}}+\sum_{i=1}^{L-1}\left(\prod_{j=i+1}^{L}A_{\omega_{\mathbf{t}^{(j)}}}^{(j)}\right)b^{(i)}_{\omega_{\mathbf{t}^{(i)}}}.$$
+\end{proposition}
+
+\begin{tproof}
+    We proceed by induction on $L$.
+    \begin{itemize}
+        \item The case for $L=1$ is clear.
+        \item Assume the expressions hold for $L-1$. Then,
+        \begin{align*}
+            f^{(L)}\left(\mathbf{x}\right)&=\sum_{\mathbf{t}^{(L)}}\left(A^{(L)}_{\omega_{\mathbf{t}^{(L)}}}\mathbf{z}^{(L-1)}+b^{(L)}_{\omega_{\mathbf{t}^{(L)}}}\right)\mathbf{1}_{\left\{\mathbf{z}^{(L-1)}\in\omega_{\mathbf{t}^{(L)}}\right\}}\\&=\sum_{\mathbf{t}^{(L)},\mathbf{t}^{(L-1)}}\left(A^{(L)}_{\omega_{\mathbf{t}^{(L)}}}\left(\left(A^{(L-1)}_{\omega_{\mathbf{t}^{(L-1)}}}\mathbf{z}^{(L-2)}+b^{(L-1)}_{\omega_{\mathbf{t}^{(L-1)}}}\right)\mathbf{1}_{\left\{\mathbf{z}^{(L-1)}\in\omega_{\mathbf{t}^{(L-2)}}\right\}}\right)+b^{(L)}_{\omega_{\mathbf{t}^{(L)}}}\right)\mathbf{1}_{\left\{\mathbf{z}^{(L-1)}\in\omega_{\mathbf{t}^{(L)}}\right\}}\\&=\sum_{\mathbf{t}^{(L)},\mathbf{t}^{(L-1)}}\left(A^{(L)}_{\omega_{\mathbf{t}^{(L)}}}A^{(L-1)}_{\omega_{\mathbf{t}^{(L-1)}}}\mathbf{z}^{(L-2)}+A^{(L)}_{\omega_{\mathbf{t}^{(L)}}}b^{(L-1)}_{\omega_{\mathbf{t}^{(L-1)}}}+b^{(L)}_{\omega_{\mathbf{t}^{(L)}}}\right)\mathbf{1}_{\left\{\mathbf{z}^{(L-1)}\in\omega_{\mathbf{t}^{(L-2)}}\right\}}\mathbf{1}_{\left\{\mathbf{z}^{(L-1)}\in\omega_{\mathbf{t}^{(L)}}\right\}}\\&=\sum_{\mathbf{t}}\left(A^{(L)}_{\omega_{\mathbf{t}^{(L)}}}\left(\prod_{\ell=L-1}^1A_{\omega_{\mathbf{t}^{(\ell)}}}^{(\ell)}\right)\mathbf{x}+A^{(L)}_{\omega_{\mathbf{t}^{(L)}}}\left(b^{(L-1)}_{\omega_{\mathbf{t}^{(L-1)}}}+\sum_{i=1}^{L-2}\left(\prod_{j=i+1}^LA_{\omega_{\mathbf{t}^{(j)}}}^{(j)}\right)b^{(i)}_{\omega_{\mathbf{t}^{(i)}}}\right)+b_{\omega_{\mathbf{t}^{(L)}}}^{(L)}\right)\mathbf{1}_{\left\{\mathbf{x}\in\omega_{\mathbf{t}}\right\}}\\&=\sum_{\mathbf{t}}\left(\left(\prod_{\ell=L}^1A_{\omega_{\mathbf{t}^{(\ell)}}}^{(\ell)}\right)\mathbf{x}+b^{(L)}_{\omega_{\mathbf{t}^{(L)}}}+\sum_{i=1}^{L-1}\left(\prod_{j=i+1}^{L}A_{\omega_{\mathbf{t}^{(j)}}}^{(j)}\right)b^{(i)}_{\omega_{\mathbf{t}^{(i)}}}\right)\mathbf{1}_{\left\{\mathbf{x}\in\omega_{\mathbf{t}}\right\}}.
+        \end{align*}
+    \end{itemize}
+\end{tproof}
+
+\begin{proposition}\label{prop:characterising_region_maps_relu_deep_networks}
+    Let $f$ be a deep network implementing ReLU, leaky ReLU or absolute value activation operators. Let $$f^{(\ell)}\left(\mathbf{z}^{(\ell-1)}\right)=\sigma\left(W^{(\ell)}\mathbf{z}^{(\ell-1)}+b^{(\ell)}\right).$$If $\mathbf{z}^{(\ell-1)}\in\omega^{(\ell)}\in\Omega^{(\ell)}$, then $$\begin{cases}A_{\omega^{(\ell)}}^{(\ell)}=\mathrm{diag}\left(q_{\omega^{(\ell)}}^{(\ell)}\right)W^{(\ell)}\\b_{\omega^{(\ell)}}^{(\ell)}=\mathrm{diag}\left(q_{\omega^{(\ell)}}^{(\ell)}\right)b^{(\ell)},\end{cases}$$where $q_{\omega^{(\ell)}}^{(\ell)}$ is the point-wise derivative of $\sigma$ at the pre-activation $W^{(\ell)}\mathbf{z}^{(\ell-1)}+b^{(\ell)}$.
+\end{proposition}
+
+\begin{tproof}
+    The follows from the fact that the operator $\sigma$ is a locally affine map around the pre-activation which passes through the origin with slope $\mathrm{diag}\left(q_{\omega^{(\ell)}}^{(\ell)}\right)$.
+\end{tproof}
+
+\begin{remark}\label{rem:characterising_region_maps_relu_deep_networks}
+    \begin{enumerate}
+        \item[]
+        \item Note that $q_{\omega^{(\ell)}}^{(\ell)}$ is well-defined as it is constant over $\omega^{(\ell)}$.
+        \item In these instances, note that one does not actually need to compute point-wise derivatives to obtain $q_{\omega^{(\ell)}}^{(\ell)}$. In fact, $$\left[q_{\omega^{(\ell)}}^{(\ell)}\right]_i=\begin{cases}\eta&\left[W^{(\ell)}\mathbf{z}^{(\ell-1)}+b^{(\ell)}\right]_i\leq0\\1&\text{otherwise},\end{cases}$$where $\eta=0$ for ReLU activation operators, $\eta$ is the parameter for leaky ReLU operators, or $\eta=-1$ for the absolute value activation operator.
+        \item Similar to the notational convention given in statement 2 of Remark \ref{rem:affine_spline}, we will let $$Q^{(\ell)}[\mathbf{x}]=\mathrm{diag}\left(q^{(\ell)}_{\omega^{(\ell)}_{\mathbf{s}^{(\ell)}(\mathbf{x})}}\right),$$and$$Q^{(\ell)}[\omega]=\mathrm{diag}\left(q^{(\ell)}_{\omega}\right),$$where here $q^{(\ell)}_{\omega}$ is the point-wise derivative of $\sigma$ at $W^{(\ell)}\mathbf{z}^{(\ell-1)}(\mathbf{x})+b^{(\ell)}$ for $\mathbf{x}\in\omega$, where $\omega\in\Omega$. 
+    \end{enumerate}
+\end{remark}
+
+\section{Fourier Analysis}\label{sec:fourier_analysis}
+
+The serial structure of deep networks hints that it may be conducive to a Fourier analysis. In this section we consider that step for ReLU deep networks. \textcolor{Red}{could we potentially extend this to leaky relu and absolute value}. In particular, we'll focus on ReLU deep networks where $d^{(L)}=1$.
+
+The Fourier representation of a deep network is $$f(\mathbf{x})=\frac{1}{\left(2\pi\right)^{\frac{d}{2}}}\int_{\mathbb{R}^d}\tilde{f}(\mathbf{u})e^{i\mathbf{u}\cdot\mathbf{x}}\,\mathrm{d}\mathbf{u},$$where$$\tilde{f}(\mathbf{u})=\int f(\mathbf{x})e^{-i\mathbf{u}\cdot\mathbf{x}}\,\mathrm{d}\mathbf{x}$$is the Fourier transform
+
+\begin{lemma}
+    The Fourier transform of a ReLU deep network decomposes as $$\tilde{f}(\mathbf{u})=i\sum_{\mathbf{s}}\frac{A_{\omega_\mathbf{s}}\mathbf{u}}{\Vert\mathbf{u}\Vert^2}\tilde{\mathbf{1}}_{\omega_\mathbf{s}}(\mathbf{u}),$$where $$\tilde{\mathbf{1}}_{\omega_\mathbf{s}}=\int_{\omega_\mathbf{s}}e^{-i\mathbf{u}\cdot\mathbf{x}}\,\mathrm{d}\mathbf{x}.$$
+\end{lemma}
+
+\begin{lemma}
+    Let $\omega$ be a full-dimensional polytope in $\mathbb{R}^d$. Its Fourier spectrum takes the form $$\tilde{\mathbf{1}}_{\omega}(\mathbf{u})=\sum_{n=0}^d\frac{D_n(\mathbf{u})\mathbf{1}_{\bar{\omega}_n}(\mathbf{u})}{\Vert\mathbf{u}\Vert^n},$$where $\bar{\omega}_n$ is the union of $n$-dimensional subspaces that are orthogonal to some $n$-codimensional face of $\omega$, and $D_n:\mathbb{R}^n\to\mathbb{C}$ is a term of order $\Theta(1)$ as $\Vert u\Vert\to\infty$.
+\end{lemma}
+
+\begin{theorem}
+    The Fourier components of a ReLU deep network $f_{\theta}$ is given by $$\tilde{f}_{\theta}(\mathbf{u})=\sum_{n=0}^d\frac{C_n(\theta,\mathbf{u})\mathbf{1}_{\bar{\omega}_n^{\theta}}(\mathbf{u})}{\Vert u\Vert^{n+1}},$$where $\bar{\omega}_n^{\theta}$ is the union of $n$-dimensional subspaces that are orthogonal to some $n$-codimensional faces of some polytope $\omega$, and $C_n:\mathbb{R}^d\to\mathbb{C}$ is a term of order $\Theta(1)$ as $\Vert u\Vert\to\infty$.
+\end{theorem}
+
+
+\section{References}
+
+Section \ref{sec:convexity}, Section \ref{sec:lipschitz}, Section \ref{sec:universality}, Section \ref{sec:template_matchers} and Section \ref{sec:input_space_partitioning} from \citet{balestrieroMadMaxAffine2018} with Proposition \ref{prop:characterising_region_maps_relu_deep_networks} from \citet{humayunSplineCamExactVisualization2023}. Section \ref{sec:fourier_analysis} from \citet{rahamanSpectralBiasNeural2018}.

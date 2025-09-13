@@ -1,0 +1,72 @@
+\section{Introduction}
+
+Deep network interpretability is the study of reverse-engineering the process of deep networks in a contextual manner. Interpretability seeks to understanding what computations a deep network is processing to arrive at its outputs. Here we explore how the characterisation of deep network geometry using spline theory can shed light on these endeavours.
+
+\section{Neurons as Fundamental Units}\label{sec:neurons_as_units}
+
+Since the architecture of deep networks is a collection of neurons connected by weights, it may be reasonable to explore the behaviour of these individual neurons to get a sense of the computations that a deep network is performing when it receives an input. After all, this has been a popular doctrine for scientists to employ when investigating how neural activity in the brain correlates with the behaviour of organisms. 
+
+Even though the architecture of a deep network would seem to favour the deep network assigning the components of its computation to neurons, there is no immediate mathematical reason as to why this should be the case\footnote{Due to this idea that the architecture of the deep network should favour computational units aligning with neurons, results in the basis spanned by neurons being called the privileged basis.}. In fact, it may even be a hindrance for these models to constrain their behaviour to the activity of individual neurons\footnote{Explore the notion of superposition and the (add lemma name) lemma to }. Furthermore, apart from collections of neurons, referred to as circuits, being identified as operating particular computational algorithms, there is limited empirical evidence that deep networks use neurons as their fundamental units of computations. What is observed is that neurons tend to fire on multiple different concepts, and thus display polysemanticity rather than monosemanticity. 
+
+\section{Directions as Fundamental Units}\label{sec:directions_as_units}
+
+Deep network are a series of affine transformations interspersed with non-linearities. In particular, the last layer of the deep network is an affine transformation. Therefore, it seem reasonable that the intermediate layers of a deep network are working towards linearly separating pertinent features for the intended task. Consequently, a focus of work in interpretability has been on extracting features of the deep network's computation using linear methods, that is attributing features to directions. %\cite{lime}
+In particular, techniques such as sparse autoencoders \cite{hubenSparseAutoencodersFind2024} (move this reference to spline theory library) have been surprisingly successful at extracting important features from transformer based deep networks, evidenced by their utility in downstream tasks; providing evidence for the linear representation hypothesis \cite{parkLinearRepresentationHypothesis2024} (move this reference to spline theory library), which posits that the units used by the deep network for computations can be represented as direction in some underlying vector space. 
+
+A prominent source of evidence for the linear representation hypothesis is the identification of polysemantic neurons, that is neurons that are active on various different concepts. Typically this polysemanticity occurs on semantically unrelated concepts. The explanation here would be that the network is storing these concepts with similar directions since they are unlikely to interfere and impact the behaviour of the deep network. More specifically, since the concepts are unrelated, they are unlikely to be present simultaneously and thus generally do not interfere. Moreover, any low level interference can be ablated by the non-linearities.
+
+However, there has been some evidence suggesting that this perspective on the deep network's computation is not the full story. In particular, the fact that polysemanticity is a useful property for the deep network lies in non-linearity. Furthermore, under the linear representation hypothesis, it follows that deep networks would be invariant to scaling. However, in practice, this is observed not be the case. Therefore, there needs to be a "distribution of validity" component of the linear representation hypothesis to explain more of the deep network's behaviour. 
+
+\section{Polytopes as Fundamental Units}\label{sec:polytopes_as_units}
+
+The polytope lens puts partitioning of the input space as the focus for understanding the behaviour of deep networks. The appeal of this perspective is that the polytopes provide a complete characterisation of the input space of deep network's, and thus offer a way for completely characterising the behaviour of these models. 
+
+Within each polytope the inputs are subject to the same affine transformation, thus we have an invariance within the polytopes. Moreover, the affine transformations do not differ drastically between neighbouring polytopes. This local invariance helps us reason about the semantics of the model's input.
+
+To better consolidate these ideas we introduce the spline code of a given polytope. For this we focus on deep networks using ReLU, leaky ReLU or absolute value activation functions.
+
+\begin{definition}
+    The spline code of a polytope (region) $\omega\in\Omega$ is the vector $\mathbf{s}=\left(\mathbf{s}^{(1)},\dots,\mathbf{s}^{(L)}\right)$ which is constructed be concatenating the vectors $$\left[\mathbf{s}^{(\ell)}\left(\mathbf{z}^{(\ell-1)}(\mathbf{x})\right)\right]_{j}=\begin{cases}1&\left\langle\left[W^{(\ell)}\right]_{j,\cdot},\mathbf{z}^{(\ell-1)}(\mathbf{x})\right\rangle+\left[b^{(\ell)}\right]_j>0\\0&\text{otherwise.}\end{cases}$$
+\end{definition}
+
+\begin{remark}
+    Note the similarity in notation to that develop in Section \ref{sec:input_space_partitioning}. We just update slightly the notation here for subsequent analyses.
+\end{remark}
+
+The spline codes do more than just help identify individual regions, they help elucidate their semantics. More specifically, note that neighbouring polytopes differ in splines codes by just one entry. Therefore, polytopes that are close together have \emph{close} spline codes. One can quantify the closeness of spline codes using Hamming distance.
+
+\begin{definition}
+    \TODO add Hamming distance definition.
+\end{definition}
+
+From this perspective we take features of the deep network to be a group of nearby polytopes that admit similar affine transformations. 
+
+\paragraph{Connection to the directions hypothesis.}
+
+The polytope lens can be seen as a slight augmentation of the linear representation hypothesis. Vectors in nearby polytopes share high similarity with those in \emph{similar} or nearby polytopes. In particular, within the same polytope the polytope lens exactly matches the features as directions hypothesis.
+
+\paragraph{Predictions of the polytope lens.}
+
+With the understanding that semantics is characterised by clusters of polytopes, we can make certain predictions on what this means for model behaviour.
+
+\begin{enumerate}
+    \item Polysemantic directions overlap with multiple monosemantic polytope regions.
+    \item Polytope boundaries reflect semantic boundaries. More specifically, polytopes will be clustered around regions of the input space with distinct semantics.
+    \item Polytopes define the distributions of when a features is associated to a particular direction. 
+\end{enumerate}
+
+\citet{blackInterpretingNeuralNetworks2022} provides evidence supporting these predictions to various extents.
+
+\section{Mechanistic Interpretability}\label{sec:mechanistic_interpretability}
+
+Recall in Section \ref{sec:neurons_as_units} we noted that it has been observed that there exists clusters of neurons whose activity patterns can be understood as performing algorithmic operations (add citations). This does not necessarily conform with the neurons as units perspective, since it comprises the interaction of multiple neurons. Similarly, it cannot be understood well through the directions as unit perspective, since as the feature spans multiple neurons it is necessarily non-linear due to the activation functions. However, there is an explanation that the polytopes as units perspective can provide. 
+
+More specifically, recall that the affine transformation operation on a region $\omega$ is given by the parameters $A_{\omega}$ and $b_{\omega}$ as given by Proposition \ref{prop:expanding_dn_parameters_with_layer_parameters} and Proposition \ref{prop:characterising_region_maps_relu_deep_networks}. In particular, Proposition \ref{prop:expanding_dn_parameters_with_layer_parameters} and Proposition \ref{prop:characterising_region_maps_relu_deep_networks} highlight how the affine transformation acting on $\omega$ is a function of the activity of the other neurons in the deep network, indeed this is precisely what $\mathbf{s}$ captures.\footnote{Here we are departing from the notation of $\mathbf{s}$ introduced in Section \ref{sec:polytopes_as_units} and recalling previous notation.}More specifically, the local complexity measure introduced in Section \ref{sec:local_complexity}, can be seen as a measure of the density of unique circuits formed in a locality of the input space. 
+
+Similarly, recall that from the polytope lens it follows that clusters of polytopes are meaningful. Therefore, since the non-linearities of individual neurons form the hyperplanes which generate these polytopes, one can see how a cluster of polytopes can be constructed from a cluster of neurons. Therefore, analysing the input space partition may facilitate circuit discovery, or help understand the nature of a circuit by identify the semantics of the inputs that arise in its corresponding cluster of polytopes.
+
+What we see then is that spline theory elucidates the interaction between neurons and how this manifests as structure in the input space of deep networks. Consequently, we connect this structure to the behaviour of the deep network by using it to augment the established observation that directions in the input space are pertinent to the deep network's behaviour.\footnote{Throughout these discussion we have been explicitly referring to the deep network and its resulting partition on its input space. However, hopefully it is clear to see that one can equally investigate the computational units of the deep network at intermediary stages by analysing the partitions of the input space of the layers instead.}
+
+\section{References}
+
+Section \ref{sec:neurons_as_units}, Section \ref{sec:directions_as_units} and Section \ref{sec:polytopes_as_units} are inspired from \citet{blackInterpretingNeuralNetworks2022}. Section \ref{sec:mechanistic_interpretability} inspired from \citet{humayunDeepNetworksAlways2024}.

@@ -1,0 +1,391 @@
+\section{Introduction}
+
+Deep networks can be utilised for various tasks, including classification and regression. Typically, this involves receiving an input and outputting a prediction. In this chapter we investigate deep networks used for generative applications, namely given an input the deep network generates a response.
+
+\section{Continuous Piecewise Affine Autoencoders}\label{sec:cpa_autoencoders}
+
+Generative models typically have an encoder and generator component. The encoder is responsible for extracting features and reducing the dimensionality of the input, the generator reconstructs a response from an \emph{embedding}.
+
+\begin{definition}
+    An autoencoder $f$ comprises non-linear components, namely the encoder $E:\mathbb{R}^d\to\mathbb{R}^{d^{\left(L_E\right)}}$ and generator $G:\mathbb{R}^{d^{\left(L_E\right)}}\to\mathbb{R}^{d^{\left(L_E+L_G\right)}}$, such that $f=G\circ E$. In particular, $E$ is a deep network with $L_E$ layers, and $G$ is a deep network with $L_G$ layers.
+\end{definition}
+
+\begin{remark}
+    Usually $d^{\left(L_E\right)}<d$ so that the deep network is encouraged to extract the most salient features for reconstruction.
+\end{remark}
+
+Under the assumption that the encoder and generator utilise affine and piece-wise affine operators, we can utilise the notation convention from statement 2 of Remark \ref{rem:affine_spline} to write
+\begin{align*}
+    f(\mathbf{x})&=(G\circ E)(\mathbf{x})\\&=A^G[E(\mathbf{x})]E(\mathbf{x})+b^G[E(\mathbf{x})]\\&=\tilde{A}^G[\mathbf{x}]\left(A^E[\mathbf{x}]\mathbf{x}+b^E[\mathbf{x}]\right)+\tilde{b}^G[\mathbf{x}]\\&=\tilde{A}^G[\mathbf{x}]A^E[\mathbf{x}]\mathbf{x}+\tilde{A}^G[\mathbf{x}]b^E[\mathbf{x}]+\tilde{b}^G[\mathbf{x}],
+\end{align*}
+where $A^E\in\mathbb{R}^{d^{\left(L_E\right)}\times d}$, $B^E\in\mathbb{R}^{d^{\left(L_E\right)}}$, $\tilde{A}^G\in\mathbb{R}^{d^{\left(L_E+L_G\right)}\times d^{\left(L_E\right)}}$ and $\tilde{B}^G\in\mathbb{R}^{d^{\left(L_E+L_G\right)}}$. Equivalently, 
+\begin{equation}\label{eq:interpretation_autoencoder}
+    f(\mathbf{x})=\sum_{j=1}^{d^{\left(L_E\right)}}\left\langle\left[A^E[\mathbf{x}]\right]_{j,\cdot},\mathbf{x}\right\rangle\left[\tilde{A}^G[\mathbf{x}]\right]_{\cdot,j}+b^{E,D}[\mathbf{x}],
+\end{equation}
+where $b^{E,D}[\mathbf{x}]:=\tilde{A}^G[\mathbf{x}]b^E[\mathbf{x}]+\tilde{b}^G[\mathbf{x}]$. Then for samples in a region $\omega\in\Omega\subseteq\mathbb{R}^d$, \eqref{eq:interpretation_autoencoder} tells us that the samples are expressed in the basis given by $\tilde{A}^G$ in a representation induced by $A^E$, these expression are then shifted according to both encoder and generator parameters.
+
+\subsection{Reconstruction Guarantees}
+
+Reconstruction models are parametrised such that $d=d^{\left(L_E+L_G\right)}$. The deep network is then trained to reconstruct inputs given a bottleneck constraint, namely having $d^{\left(L_E\right)}<d$.
+
+With our continuous piecewise affine perspective on autoencoder networks, we can derive guarantees on their reconstruction abilities. In particular, we consider zero-bias autoencoders, which are autoencoders where $b^{d^{(\ell)}}=\mathbf{0}$ for every $\ell\in\left\{1,\dots,L_E+L_G\right\}$.
+
+\begin{proposition}\label{prop:necessary_condition_reconstruct_ae}
+    A necessary condition for a zero-bias autoencoder to reconstruct a piecewise linear data surface it to be bi-orthogonal, namely for every $\mathbf{x}\in\omega$ if $f(\mathbf{x})=\mathbf{x}$ then $\left\langle\left[\tilde{A}^G[\mathbf{x}]\right]_{\cdot,j},\left[A^E[\mathbf{x}]\right]_{j^\prime,\cdot}\right\rangle=\delta_{jj^\prime}$ for every $j,j^\prime\in\left\{1,\dots,d^{\left(L_E\right)}\right\}$.\footnote{We are using Kronecker delta notation.}
+\end{proposition}
+
+\begin{tproof}
+    Reconstruction implies that for every $\mathbf{x}\in\mathbb{R}^d$ we have $$\mathbf{x}=\sum_{j=1}^{d^{\left(L_E\right)}}\left\langle\left[A^E[\mathbf{x}]\right]_{j,\cdot},\mathbf{x}\right\rangle\left[\tilde{A}^G[\mathbf{x}]\right]_{\cdot,j}.$$Therefore, 
+    \begin{align*}
+        \sum_{j^\prime=1}^{d^{\left(L_E\right)}}\left\langle\left[A^E[\mathbf{x}]\right]_{j^\prime,\cdot},\mathbf{x}\right\rangle\left[\tilde{A}^G[\mathbf{x}]\right]_{\cdot,j^\prime}&=\sum_{j^\prime=1}^{d^{\left(L_E\right)}}\left\langle\left[A^E[\mathbf{x}]\right]_{j^\prime,\cdot},\sum_{j=1}^{d^{\left(L_E\right)}}\left\langle\left[A^E[\mathbf{x}]\right]_{j,\cdot},\mathbf{x}\right\rangle\left[\tilde{A}^G[\mathbf{x}]\right]_{\cdot,j}\right\rangle\left[\tilde{A}^G[\mathbf{x}]\right]_{\cdot,j^\prime}\\&=\sum_{j^\prime=1}^{d^{\left(L_E\right)}}\sum_{j=1}^{d^{\left(L_E\right)}}\left\langle\left[A^E[\mathbf{x}]\right]_{j,\cdot},\mathbf{x}\right\rangle\left\langle\left[A^E[\mathbf{x}]\right]_{j^\prime,\cdot},\left[\tilde{A}^G[\mathbf{x}]\right]_{\cdot,j}\right\rangle\left[\tilde{A}^G[\mathbf{x}]\right]_{\cdot,j^\prime}.
+    \end{align*}
+    Hence, as reconstruction implies that $\tilde{A}^G[\mathbf{x}]A^E[\mathbf{x}]$ is injective on the region $\omega$ encompassing $\mathbf{x}$, it follows that $$\left\langle\left[A^E[\mathbf{x}]\right]_{j^\prime,\cdot},\left[\tilde{A}^G[\mathbf{x}]\right]_{\cdot,j}\right\rangle=\delta_{jj^\prime}$$for every $j,j^\prime\in\left\{1,\dots,d^{\left(L_E\right)}\right\}$.
+\end{tproof}
+
+\begin{remark}
+    What Proposition \ref{prop:necessary_condition_reconstruct_ae} is requiring is that the map obtained by applying the encoder and then generator is the identity map.
+\end{remark}
+
+\begin{corollary}
+    Let $L_E=L_P=1$ and suppose $E$ and $G$ employ ReLU activation operations. Let $W^{(1)}\in\mathbb{R}^{d^{(1)}\times d}$ and $W^{(2)}\in\mathbb{R}^{d\times d^{(1)}}$ be the encoders and generators weight matrices respectively. Then for every $\mathbf{x}\in\mathbb{R}^d$ and $j,j^\prime\in\left\{1,\dots,d^{(1)}\right\}$ distinct, a necessary condition for bi-orthogonality is that one of the following statements is satisfied.
+    \begin{enumerate}
+        \item $\left\langle\left[W^{(1)}\right]_{j,\cdot},\mathbf{x}\right\rangle\leq0$.
+        \item $\left\langle\left[W^{(2)}\right]_{i,\cdot},E(\mathbf{x})\right\rangle\leq0$ for every $i=1,\dots,d$.
+        \item $\left\langle\left[W^{(2)}\right]_{i,\cdot},E(\mathbf{x})\right\rangle>0$ and $\left\langle\left[W^{(2)}\right]_{\cdot,j^\prime},\left[W^{(1)}\right]_{j,\cdot}\right\rangle=0$ for every $i=1,\dots,d$.
+        \item $\sum_{i=1}^d\left[W^{(2)}\right]_{i,j^\prime}\left[W^{(1)}\right]_{j,i}\mathbf{1}_{\left\{\left\langle\left[W^{(2)}\right]_{i,\cdot},E(\mathbf{x})\right\rangle>0\right\}}=0$.
+    \end{enumerate}
+\end{corollary}
+
+\begin{tproof}
+    In this setting, 
+    \begin{align*}
+        \left[A^E[\mathbf{x}]\right]_{j,\cdot}&=\left[Q^{(1)}[\mathbf{x}]W^{(1)}\right]_{j,\cdot}\\&=\left[Q^{(1)}[\mathbf{x}]\right]_{j,\cdot}W^{(1)}\\&=\mathbf{1}_{\left\{\left\langle\left[W^{(1)}\right]_{j,\cdot},\mathbf{x}\right\rangle>0\right\}}\left[W^{(1)}\right]_{j,\cdot}
+    \end{align*}
+    and
+    \begin{align*}
+        \left[\tilde{A}^D[\mathbf{x}]\right]_{\cdot,j}&=\left[Q^{(2)}[\mathbf{x}]W^{(2)}\right]_{\cdot,j}\\&=Q^{(2)}[\mathbf{x}]\left[W^{(2)}\right]_{\cdot,j}\\&=\mathrm{diag}\left(\begin{pmatrix}\mathbf{1}_{\left\{\left\langle\left[W^{(2)}\right]_{1,\cdots},E(\mathbf{x})\right\rangle>0\right\}}\\\vdots\\\mathbf{1}_{\left\{\left\langle\left[W^{(2)}\right]_{d,\cdots},E(\mathbf{x})\right\rangle>0\right\}}\end{pmatrix}\right)\left[W^{(2)}\right]_{\cdot,j},
+    \end{align*}
+    where we are utilising Prop \ref{prop:characterising_region_maps_relu_deep_networks} and the notation of statement 3 Remark \ref{rem:characterising_region_maps_relu_deep_networks}. From Proposition \ref{prop:necessary_condition_reconstruct_ae}, we know that under the assumption of reconstruction and $j,j^\prime$ distinct, we have 
+    \begin{equation}\label{eq:bi_orthogonality_nec_condition}
+        \left\langle\left[A^E[\mathbf{x}]\right]_{j^\prime,\cdot},\left[\tilde{A}^G[\mathbf{x}]\right]_{\cdot,j}\right\rangle=0.
+    \end{equation}
+    With the expansion $$\left\langle\left[A^E[\mathbf{x}]\right]_{j^\prime,\cdot},\left[\tilde{A}^G[\mathbf{x}]\right]_{\cdot,j}\right\rangle=\mathbf{1}_{\left\{\left\langle\left[W^{(1)}\right]_{j,\cdot},\mathbf{x}\right\rangle>0\right\}}\left\langle\left[W^{(1)}\right]_{j,\cdot},Q^{(2)}[\mathbf{x}]\left[W^{(2)}\right]_{\cdot,j}\right\rangle,$$we get statement 1 by setting $\mathbf{1}_{\left\{\left\langle\left[W^{(1)}\right]_{j,\cdot},\mathbf{x}\right\rangle>0\right\}}=0$ and statement 2 by setting $Q^{(2)}[\mathbf{x}]=0$. From the expansion $$\left\langle\left[A^E[\mathbf{x}]\right]_{j^\prime,\cdot},\left[\tilde{A}^G[\mathbf{x}]\right]_{\cdot,j}\right\rangle=\mathbf{1}_{\left\{\left\langle\left[W^{(1)}\right]_{j,\cdot},\mathbf{x}\right\rangle>0\right\}}\left\langle\left[W^{(2)}\right]_{\cdot,j},Q^{(2)}[\mathbf{x}]\left[W^{(1)}\right]_{j,\cdot}\right\rangle,$$we get the possibility that $Q^{(2)}[\mathbf{x}]\left[W^{(1)}\right]_{j,\cdot}=0$ which gives statement 3. Similarly, the expansion $$\left\langle\left[A^E[\mathbf{x}]\right]_{j^\prime,\cdot},\left[\tilde{A}^G[\mathbf{x}]\right]_{\cdot,j}\right\rangle=\mathbf{1}_{\left\{\left\langle\left[W^{(1)}\right]_{j,\cdot},\mathbf{x}\right\rangle>0\right\}}\sum_{i=1}^d\left[W^{(2)}\right]_{i,j^\prime}\left[W^{(1)}\right]_{j,i}\mathbf{1}_{\left\{\left\langle\left[W^{(2)}\right]_{i,\cdot},E(\mathbf{x})\right\rangle>0\right\}}$$gives the possibility that $\sum_{i=1}^d\left[W^{(2)}\right]_{i,j^\prime}\left[W^{(1)}\right]_{j,i}\mathbf{1}_{\left\{\left\langle\left[W^{(2)}\right]_{i,\cdot},E(\mathbf{x})\right\rangle>0\right\}}=0$ which is statement 4. With the understanding that none of the rows or columns of $W^{(1)}$ and $W^{(2)}$ can be zero, this entertains all possibilities for satisfying \eqref{eq:bi_orthogonality_nec_condition}, therefore, the proof is complete.
+\end{tproof}
+
+\begin{remark}
+    \begin{enumerate}
+        \item[]
+        \item Statement 1 corresponds to the case where the input of the $j^\text{th}$ unit in the bottleneck layer is negative.
+        \item Statement 2 corresponds to the case where the input of all output units is negative.
+        \item Statement 3 corresponds to the case of a linear generator and orthogonality in the weights.
+        \item Statement 4 corresponds to an orthogonality condition between the $\left(j^\prime\right)^\text{th}$ column of the generator weights and the $j^\text{th}$ row of the encoder weights, modulo the activations of the generator layer.
+        \item Note that if statement 2 and 3 hold for multiple regions, then the generator is linear with respect to the coordinate space and forms a linear manifold.
+    \end{enumerate}
+\end{remark}
+
+\subsection{Autoencoder Jacobian}
+
+The continuous piecewise affine perspective of autoencoders also allows us to reason about their Jacobians. 
+
+\begin{proposition}
+    For an autoencoder $f=G\circ E$, we have $$J_f(\mathbf{x})=\tilde{A}^G[\mathbf{x}]A^E[\mathbf{x}],$$provided $\mathbf{x}$ is in the interior of its corresponding region $\omega$.
+\end{proposition}
+
+\begin{tproof}
+    Recall that $\left[J_f(\mathbf{x})\right]_{i,j}=\frac{\partial[f]_i}{\partial[\mathbf{x}]_j}$. Therefore,
+    \begin{align*}
+        \frac{\partial[f]_i}{\partial[\mathbf{x}]_j}&=\lim_{\epsilon\to0}\left(\frac{\left[f\left(\mathbf{x}+\epsilon\mathbf{e}_j\right)\right]_i-\left[f(\mathbf{x})\right]_i}{\epsilon}\right)\\&\overset{(1)}{=}\lim_{\epsilon\to0}\left(\frac{\left[\tilde{A}^G[\mathbf{x}]A^E[\mathbf{x}]\left(\mathbf{x}+\epsilon\mathbf{e}_j\right)\right]_i-\left[\tilde{A}^G[\mathbf{x}]A^E[\mathbf{x}]\right]_i}{\epsilon}\right)\\&=\left[\tilde{A}^G[\mathbf{x}]A^E[\mathbf{x}]\mathbf{e}_j\right]_i\\&=\left[\tilde{A}^G[\mathbf{x}]A^E[\mathbf{x}]\right]_{i,j},
+    \end{align*}
+    where in $(1)$ we are assuming $\epsilon$ is sufficiently small so that $\mathbf{x}+\epsilon\mathbf{e}_j\in\omega$ which can be done since $\mathbf{x}$ is in the interior of $\omega$. It follows that $J_f(\mathbf{x})=\tilde{A}^G[\mathbf{x}]A^E[\mathbf{x}]$.
+\end{tproof}
+
+Similarly, one can obtain the Jacobian of the generator block on the embedding space of the autoencoder model as $$J_{G}(\mathbf{z})=A^G[\mathbf{z}],$$where $\mathbf{z}\in\mathbb{R}^{d^{\left(L_E\right)}}$. Note that $J_G(\mathbf{z})$ is constant for all $\mathbf{z}\in\omega$, where $\omega\in\Omega^G$ is a region in $\mathbb{R}^{d^{\left(L_E\right)}}$ induced by $G$. Consequently, we'll adopt the notation $J_G(\omega)$ to denote $J_G(\mathbf{z})$ for $\mathbf{z}\in\omega$. This allows for a characterisation of the curvature of the induced data manifold using the per-region Hessian, $$\left\Vert H_{\omega}\right\Vert_F=\sum_{\omega^\prime\in\mathcal{N}(\omega)}\left\Vert J_G(\omega)-J_G\left(\omega^\prime\right)\right\Vert_F,$$where $\Vert\cdot\Vert_F$ is the Frobenius norm, and $\mathcal{N}(\omega)$ is the set of neighbours of the region $\omega$.
+
+\section{Continuous Piecewise Affine Variational Autoencoders}\label{sec:cpa_vaes}
+
+\subsection{Variational Bayes}\label{sec:variational_bayes}
+
+Suppose we have some dataset $\left\{\mathbf{x}_i\right\}_{i=1}^n$, that is an independent and identically distributed sample from some discrete variable $\mathbf{x}$. In particular, suppose that the data is generated by a random process governed by a continuous unobserved random variable $\mathbf{z}$. That is, for each observation $\mathbf{x}_i$ a value $\mathbf{z}_i$ was generated and then used to generate $\mathbf{x}_i$. As is the case with most problems in deep learning, we are looking for a characterisation of the distribution of our dataset. Formally, we suppose the $\mathbf{z}_i$ are generated from $p_{\theta^*}(\mathbf{z})$, the observations are then generated from $p_{\theta^*}(\mathbf{x}\vert\mathbf{z})$, so that $$p(\mathbf{x})=\int p_{\theta^*}(\mathbf{x}\vert\mathbf{z})p_{\theta^*}(\mathbf{z})\,\mathrm{d}\mathbf{z}.$$Typically, we suppose that we can model these distributions from a parametric family of distributions $p_{\theta}(\mathbf{z})$ and $p_{\theta}(\mathbf{x}\vert\mathbf{z})$, whose probability density functions are differentiable almost everywhere, allowing for learning. In particular, the log-likelihood is given by $$\log\left(p_{\theta}(\mathbf{x})\right)=\sum_{i=1}^n\log\left(p_{\theta}(\mathbf{x}_i)\right)=\sum_{i=1}^n\log\left(\int p_{\theta}(\mathbf{x}_i\vert\mathbf{z})p_{\theta}(\mathbf{z})\,\mathrm{d}\mathbf{z}\right).$$The Expectation-Maximization algorithm (citation) works in stages to perform this learning. The E-step infers the latent variables associated with respect to the observations by taking the expectation of the log-likelihood, and then this is maximized in the M-step with respect to the parameters $\theta$. This process is predicated on the posterior $p_{\theta}(\mathbf{z}\vert\mathbf{x})$ being tractable, which is rarely the case. Instead, we introduce a variational distribution $q_{\gamma}(\mathbf{z})$ to approximate the posterior. Then observe that
+\begin{align*}
+    \log\left(p_{\theta}\left(\mathbf{x}_i\right)\right)&=\mathrm{KL}\left(q_{\gamma}(\mathbf{z});p_{\theta}\left(\mathbf{z}\vert\mathbf{x}_i\right)\right)\\&\quad+\underbrace{\mathbb{E}_{q_{\gamma}(\mathbf{z})}\left(-\log\left(q_{\gamma}(\mathbf{z})\right)\right)+\mathbb{E}_{q_{\gamma}(\mathbf{z})}\left(p_{\theta}\left(\mathbf{x}_i\vert\mathbf{z}\right)\right)}_{\text{evidence lower bound}}.
+\end{align*}
+The intractability of the posterior means the first term of the right-hand side is still intractable; however, since it is non-negative, the evidence lower bound is a lower bound on the log-likelihood. Thus an alternative strategy is to apply the Expectation-Maximization algorithm to maximize the evidence lower bound, which can be shown to indirectly minimize the discrepancy between the variational distribution and the posterior. More specifically, maximizing the evidence lower bound with respect to $\gamma$ goes toward ensuring the variational distribution approximates the true posterior, a variational E-step. Then, maximizing the evidence lower bound with respect to $\theta$ goes toward fitting our model to the data; depending on the tightness of this lower bound, which is dependent on the suitability of $q_{\gamma}(\mathbf{z})$ at approximating the posterior, this is an analogous M-step.  
+
+\subsection{Variational Autoencoders}
+
+In a variational autoencoder, the conditional distribution is taken to be $$p_{\theta}(\mathbf{x}\vert\mathbf{z})=\phi\left(\mathbf{x};G_{\theta}(\mathbf{z}),\sigma_{\mathbf{x}}\right),$$and the prior is taken to be $$p(\mathbf{z})=\phi\left(\mathbf{z};0,\sigma_{\mathbf{z}}\right),$$where $G_{\theta}$ is a deep generative model, and $\phi$ is the multivariate Gaussian density function with given mean and variance.\footnote{These seemingly strong assumptions are reasonable since any distribution can be sufficiently transformed by a sufficiently complex function into a normal distribution.}When considering the deep generative network to be a continuous affine spline, we can obtain analytic expressions for the conditional, marginal and posterior distributions.
+
+\subsection{Conditional, Posterior and Marginal Distributions}
+
+\begin{lemma}
+    If $G_{\theta}$ is a continuous piecewise affine spline, then $$p(\mathbf{x}\vert\mathbf{z})=\sum_{\omega\in\Omega}\phi\left(\mathbf{x};A_{\omega}\mathbf{z}+b_{\omega},\sigma_{\mathbf{x}}\right)\mathbf{1}_{\left\{\mathbf{z}\in\omega\right\}}.$$
+\end{lemma}
+
+\begin{tproof}
+    Observe that
+    \begin{align*}
+        p(\mathbf{x}\vert\mathbf{z})&=\frac{1}{(2\pi)^{\frac{d}{2}}\sqrt{\left\vert\det\left(\sigma_{\mathbf{x}}\right)\right\vert}}\exp\left(-\frac{1}{2}\left(\mathbf{x}-G_{\theta}(\mathbf{x})\right)^\top\sigma_{\mathbf{x}}^{-1}\left(\mathbf{x}-G_{\theta}(\mathbf{x})\right)\right)\\&=\frac{1}{(2\pi)^{\frac{d}{2}}\sqrt{\left\vert\det\left(\sigma_{\mathbf{x}}\right)\right\vert}}\exp\left(-\frac{1}{2}\left(\mathbf{x}-(A[\mathbf{z}]\mathbf{z}+b[\mathbf{z}])\right)^\top\sigma_{\mathbf{x}}^{-1}\left(x-(A[\mathbf{z}]\mathbf{z}+b[\mathbf{z}])\right)\right)\\&=\frac{1}{(2\pi)^{\frac{d}{2}}\sqrt{\left\vert\det\left(\sigma_{\mathbf{x}}\right)\right\vert}}\exp\left(-\frac{1}{2}\left(\sum_{\omega\in\Omega}\mathbf{1}_{\{\mathbf{z}\in\omega\}}\left(\mathbf{x}-\left(A_{\omega}\mathbf{z}+b_{\omega}\mathbf{z}\right)\right)^\top\sigma_{\mathbf{x}}^{-1}\left(\mathbf{x}-\left(A_{\omega}\mathbf{z}+b_{\omega}\right)\right)\right)\right)\\&=\sum_{\omega\in\Omega}\mathbf{1}_{\{\mathbf{z}\in\omega\}}\frac{1}{(2\pi)^{\frac{d}{2}}\sqrt{\left\vert\det\left(\sigma_{\mathbf{x}}\right)\right\vert}}\exp\left(-\frac{1}{2}\left(\left(\mathbf{x}-\left(A_{\omega}\mathbf{z}+b_{\omega}\right)\right)^\top\sigma_{\mathbf{x}}^{-1}\left(\mathbf{x}-\left(A_{\omega}\mathbf{z}+b_{\omega}\right)\right)\right)\right)\\&=\sum_{\omega\in\Omega}\phi\left(\mathbf{x};A_{\omega}\mathbf{z}+b_{\omega},\sigma_{\mathbf{x}}\right)\mathbf{1}_{\{\mathbf{z}\in\omega\}}.
+    \end{align*}
+\end{tproof}
+
+\begin{theorem}\label{thm:analytic_marginal_posterior}
+    If $G_{\theta}$ is a continuous piecewise affine spline, then $$\begin{cases}p(\mathbf{x})=\sum_{\omega\in\Omega}\phi\left(\mathbf{x};b_{\omega},\sigma_{\mathbf{x}}+A_{\omega}\sigma_{\mathbf{z}}A_{\omega}^\top\right)\Phi_{\omega}\left(\mu_{\omega}(\mathbf{x}),\sigma_{\omega}\right)\\p(\mathbf{z}\vert\mathbf{x})=p(\mathbf{x})^{-1}\sum_{\omega\in\Omega}\phi\left(\mathbf{x};b_{\omega},\sigma_{\mathbf{x}}+A_{\omega}\sigma_{\mathbf{z}}A_{\omega}^\top\right)\phi\left(\mathbf{z};\mu_{\omega}(\mathbf{x}),\sigma_{\omega}\right),\end{cases}$$where $\Phi_{\omega}\left(\mu_{\omega}(\mathbf{x}),\sigma_{\omega}\right)$ denotes the integral of the Gaussian with parameters $\mu_{\omega}(\mathbf{x})$ and $\sigma_{\omega}$ on the domain $\omega$, with $$\begin{cases}\mu_{\omega}(\mathbf{x})=\sigma_{\omega}\left(A_{\omega}^\top\sigma_{\mathbf{x}}^{-1}\left(\mathbf{x}-b_{\omega}\right)\right)\\\sigma_{\omega}=\left(\sigma_{\mathbf{z}}^{-1}+A_{\omega}^\top\sigma_{\mathbf{x}}^{-1}A_{\omega}\right)^{-1}.\end{cases}$$
+\end{theorem}
+
+\begin{tproof}
+    Refer to \S F.3 \citet{balestrieroAnalyticalProbabilityDistributions2020}.
+\end{tproof}
+
+\begin{corollary}\label{cor:truncated_gaussians}
+    The posterior of a deep generative network is a mixture of $\vert\Omega\vert$ truncated Gaussians.
+\end{corollary}
+
+\begin{remark}
+    Corollary \ref{cor:truncated_gaussians} has implications on the form of the variational distribution $q_{\gamma}(\mathbf{z})$ used to model the posterior. In particular, practitioners should favour forms able to approximate multimodal data; thus using a Gaussian distribution is perhaps not ideal.
+\end{remark}
+
+\subsection{Gaussian Integration on Partitions}
+
+From Theorem \ref{thm:analytic_marginal_posterior}, it is necessary to compute the Gaussian integral over regions $\omega$. To do so, one can leverage known forms of the Gaussian integral by decomposing $\omega$. More specifically, we utilise the Delaunay triangulation $$T(\omega)=\left\{\Delta_1,\dots,\Delta_m\right\},$$where $$\begin{cases}\bigcup_{i=1}^m\Delta_i=\omega\\\Delta_i\cap\Delta_j=\emptyset&i\neq j,\end{cases}$$and each $\Delta_i$ is a simplex given by half-spaces $\Delta_i=\bigcap_{s=1}^{d^{\left(L_E\right)}+1}H_{i,s}$.
+
+\begin{lemma}\label{lem:integral_over_simplices}
+    For any integrable function $g$, on a polytopal region $\omega$ we have $$\int_{\omega}g(\mathbf{z})\,\mathrm{d}\mathbf{z}=\sum_{\Delta\in T(\omega)}\sum_{(s,V)\in H(\Delta)}s\int_Vg(\mathbf{z})\,\mathrm{d}\mathbf{z},$$where $$H\left(\Delta_i\right):=\left\{\left((-1)^{\vert J\vert+d^{\left(L_E\right)}},\cap_{j\in J}H_{i,j}\right):J\subseteq\left\{1,\dots,d^{\left(L_E\right)}+1\right\},\,\vert J\vert\leq d^{\left(L_E\right)}\right\}.$$
+\end{lemma}
+
+\begin{tproof}
+    Refer to \S F.7 \citet{balestrieroAnalyticalProbabilityDistributions2020}.
+\end{tproof}
+
+We can then use known results of the Gaussian integral over simplices in conjunction with Lemma \ref{lem:integral_over_simplices} to compute the Gaussian integral over polytopal regions $\omega$, as required for Theorem \ref{thm:analytic_marginal_posterior}
+
+\subsection{Expectation-Maximization Learning}
+
+With analytic derivations of the posterior distribution, that are computable, one can effectively implement Expectation-Maximization learning to the probabilistic modelling problem at hand.
+
+\paragraph{Expectation Step}
+
+\begin{proposition}\label{prop:analytic_e_step}
+    With $\mathbf{e}_{\omega}^{(0)}(\mathbf{x}):=\mathbb{E}_{p(\mathbf{z}\vert\mathbf{x})}\left(\mathbf{1}_{\{\mathbf{z}\in\omega\}}\right)$, $\mathbf{e}_{\omega}^{(1)}(\mathbf{x}):=\mathbb{E}\left(\mathbf{z}\mathbf{1}_{\{\mathbf{z}\in\omega\}}\right)$ and $\mathbf{e}_{\omega}^{(2)}(\mathbf{x}):=\mathbb{E}_{p(\mathbf{z}\vert\mathbf{x})}\left(\mathbf{z}\mathbf{z}^\top\mathbf{1}_{\{\mathbf{z}\in\omega\}}\right)$ we have 
+    \begin{align*}
+        \mathbb{E}_{p(\mathbf{z}\vert\mathbf{x})}\left(\log(p(\mathbf{x}\vert\mathbf{z})p(\mathbf{z}))\right)=&-\frac{1}{2}\left((2\pi)^{d^{(L_E)}+d}\left\vert\det\left(\sigma_{\mathbf{x}}\right)\right\vert\left\vert\det\left(\sigma_{\mathbf{z}}\right)\right\vert\right)\\&-\frac{1}{2}\mathrm{tr}\left(\sigma_{\mathbf{z}}^{-1}\mathbf{e}^{(2)}(\mathbf{x})\right)\\&-\frac{1}{2}\Bigg(\mathbf{x}^\top\sigma_{\mathbf{x}}^{-1}\mathbf{x}-2\mathbf{x}^\top\sigma_{\mathbf{x}}^{-1}\left(\sum_{\omega}A_{\omega}\mathbf{e}_{\omega}^{(1)}(\mathbf{x})+b_{\omega}\mathbf{e}_{\omega}^{(0)}(\mathbf{x})\right))\\&+\sum_{\omega}\left(\mathrm{tr}\left(A_{\omega}^\top\sigma_{\mathbf{x}}^{-1}A_{\omega}\mathbf{e}_{\omega}^{(2)}(\mathbf{x})\right)+\left(\mathbf{e}_{\omega}^{(0)}(\mathbf{x})b_{\omega}+2A_{\omega}\mathbf{e}_{\omega}^{(1)}(\mathbf{x})\right)^\top\sigma_{\mathbf{x}}^{-1}b_{\omega}\right)\Bigg).
+    \end{align*}
+\end{proposition}
+
+\begin{tproof}
+    Refer to \S G.1 \citet{balestrieroAnalyticalProbabilityDistributions2020}.
+\end{tproof}
+
+\paragraph{Maximization Step}
+
+Given Proposition \ref{prop:analytic_e_step} and the Gaussian parameterization, one can perform the maximization step analytically in a gradient-free manner.
+
+\begin{proposition}
+    Let $A_{\omega}^{(L\rightarrow i)}:=\left(A_{\omega}^{(i\leftarrow L)}\right)^\top$ be the back-propagation matrix to layer $i$, let $$r_{\omega}^{(\ell)}(\mathbf{x}):=\left(\mathbf{x}\mathbf{e}^{(0)}_{\omega}(\mathbf{x})-\left(A_{\omega}\mathbf{e}_{\omega}^{(1)}(\mathbf{x})+\sum_{i\neq\ell}\mathbf{e}_{\omega}^{(0)}(\mathbf{x})A_{\omega}^{(i+1\rightarrow L)}Q_{\omega}^{(i)}b^{(i)}\right)\right)$$be the expected residual without $b^{(\ell)}$, and $$\hat{\mathbf{z}}_{\omega}^{(\ell)}:=Q_{\omega}^{(\ell-1)}\left(A^{(1\rightarrow\ell-1)}_{\omega}\mathbf{e}^{(1)}_{\omega}(\mathbf{x})+b_{\omega}^{(1\rightarrow\ell-1)}\mathbf{e}_{\omega}^{(0)}\right),$$be the expected feature map of layer $\ell$. Then, the maximizing variance parameter is $$\sigma_{\mathbf{x}}^*=\frac{1}{N}\sum_{i=1}^n\left(\mathbf{x}_i\mathbf{x}_i^\top+\sum_{\omega\in\Omega}b_{\omega}\left(b_{\omega}\mathbf{e}^{(0)}\left(\mathbf{x}_i\right)+2A_{\omega}\mathbf{e}_{\omega}^{(1)}\left(\mathbf{x}_i\right)\right)^\top-2\mathbf{x}_i\left(\hat{\mathbf{z}}_{\omega}\left(\mathbf{x}_i\right)\right)^\top+A_{\omega}\mathbf{e}_{\omega}^{(2)}\left(\mathbf{x}_i\right)A_{\omega}^\top\right),$$the maximizing bias parameter is $$\left(b^{(\ell)}\right)^*=\left(\sum_{i=1}^n\sum_{\omega\in\Omega}Q_{\omega}^{(\ell)}A_{\omega}^{(L\rightarrow\ell+1)}\sigma_{\mathbf{x}_i}^{-1}A_{\omega}^{(\ell+1\to L)}Q_{\omega}^{(\ell)}\right)^{-1}\left(\sum_{i=1}^n\sum_{\omega\in\Omega}Q_{\omega}^{(\ell)}A_{\omega}^{(L\rightarrow\ell+1)}\sigma_{\mathbf{x}_i}^{-1}r_{\omega}^{(\ell)}\left(\mathbf{x}_i\right)\right),$$and the maximizing weight parameter is $$\mathrm{vect}\left(\left(W^{(\ell)}\right)^*\right)=U_{\omega}^{-1}\mathrm{vect}\left(\sum_{i=1}^n\sum_{\omega\in\Omega}Q_{\omega}^{(\ell)}A^{(L\rightarrow\ell+1)}\sigma_{\mathbf{x}_i}^{-1}\left(\mathbf{x}_i-\sum_{j=\ell}^LA_{\omega}^{(j+1\to L)}Q_{\omega}^{(j)}b^{(j)}\right)\left(\hat{\mathbf{z}}_{\omega}^{(\ell)}\left(\mathbf{x}_i\right)\right)^\top\right),$$where $U_{\omega}=$\TODO.
+\end{proposition}
+
+\begin{tproof}
+    Refer to \S G.2 \citet{balestrieroAnalyticalProbabilityDistributions2020}.
+\end{tproof}
+
+\section{Density of Generated Manifold}\label{sec:density_generated_manifold}
+
+In this section, Section \ref{sec:polarity_sampling}, and Section \ref{sec:scales} we'll focus on the generator component of a generative model. We'll update our notation with Definition \ref{def:generator}.
+
+\begin{definition}\label{def:generator}
+    A deep generative network is a non-linear operator $G_{\theta}$ with parameters $\theta$, mapping a latent input $\mathbf{z}\in\mathbb{R}^d$ to an observation $\mathbf{y}\in\mathbb{R}^{d^{(L)}}$ by composing $L$ layers.
+\end{definition}
+
+\begin{remark}
+    Just as in the case of deep networks utilising piecewise affine non-linearities, a deep generative network utilising piecewise affine non-linearities can be considered a continuous piecewise affine spline.
+\end{remark}
+
+Suppose $d\leq d^{(\ell)}$, then the image of $G_{\theta}$ is a continuous piecewise affine manifold of dimension at most $d$. In particular, $$\mathrm{Im}\left(G_{\theta}\right):=\left\{G_{\theta}(\mathbf{z}):\mathbf{z}\in\mathbb{R}^d\right\}=\bigcup_{\omega\in\Omega}\mathrm{aff}_{\omega},$$where $\mathrm{aff}_{\omega}=\left\{A_{\omega}\mathbf{z}+b_{\omega}:\mathbf{z}\in\omega\right\}$.
+
+Henceforth, we will denote the volume of a region $\omega\in\Omega$ as $\mu(\omega)$. Moreover, we assume that the operator $G_{\theta}$ is bijective from its domain to its image, that is, each $A_{\omega}$ is full rank.
+
+\begin{lemma}
+    We have $$\frac{\mu\left(\mathrm{aff}_{\omega}\right)}{\mu(\omega)}=\sqrt{\det\left(A^{\top}_{\omega}A_{\omega}\right)}.$$
+\end{lemma}
+
+\begin{tproof}
+    The per-region affine mapping, $M(\mathbf{z})=A_{\omega}\mathbf{z}+b_{\omega}$ produces an affine subspace embedded in the Euclidean space of dimension $d^{(L)}$. The metric tensor is given by $g=A_{\omega}^\top A_{\omega}$, Theorem 3.14 (Sard's) \citet{spivakCalculusManifoldsModern1965}. Leading to
+    \begin{align*}
+        \mu\left(\mathrm{aff}_{\omega}\right)&=\int_{\mathrm{aff}_{\omega}}\,\mathrm{d}\mathbf{x}\\&=\frac{1}{\sqrt{\det\left(A_{\omega}^\top A_{\omega}\right)}}\int_{\omega}\,\mathrm{d}\mathbf{z}\\&=\frac{\mu(\omega)}{\sqrt{\det\left(A_{\omega}^\top A_{\omega}\right)}}.
+    \end{align*}
+\end{tproof}
+
+\begin{theorem}\label{thm:density_generated_manifold}
+    The probability density $p_{G_{\theta}}(\mathbf{y})$ generated by $G_{\theta}$ for latent space distribution $p_{\mathbf{z}}$ is given by $$p_{G_{\theta}}(\mathbf{y})=\sum_{\omega\in\Omega}\frac{p_{\mathbf{z}}\left(\left(A_{\omega}^\top A_{\omega}\right)^{-1}A_{\omega}^\top\left(\mathbf{y}-b_{\omega}\right)\right)}{\sqrt{\det\left(A_{\omega}^\top A_{\omega}\right)}}\mathbf{1}_{\left\{\mathbf{y}\in\mathrm{aff}_{\omega}\right\}},$$where $A_{\omega}^{\dagger}:=\left(A_{\omega}^\top A_{\omega}\right)^{-1}A_{\omega}^\top$.\footnote{This is also known as the Moore-Penrose inverse.}
+\end{theorem}
+
+\begin{tproof}
+
+    Let $\varrho_i(\cdot)$ denote the $i^\text{th}$ singular value of a matrix.
+
+    \begin{plemma}\label{lem:det_gram_matrix}
+        Let $A$ be a matrix, then $$\sqrt{\det\left(A^\top A\right)}=\prod_{i:\varrho_i(A)\neq0}\varrho_i(A).$$
+    \end{plemma}
+
+    \begin{pproof}
+        Let $A$ have singular value decomposition $USV^\top$. Then
+        \begin{align*}
+            \sqrt{\det\left(A^\top A\right)}&=\sqrt{\det\left(\left(USV^\top\right)^\top\left(USV^\top\right)\right)}\\&=\sqrt{\det\left(VS^\top U^\top USV^\top\right)}\\&=\sqrt{\det\left(VS^\top SV^\top\right)}\\&=\sqrt{\det\left(S^\top S\right)}\\&=\prod_{i:\varrho_i(A)\neq0}\varrho_i(A).
+        \end{align*}
+    \end{pproof}
+
+    \begin{plemma}\label{lem:singular_values_plus_matrix}
+        We have $$\varrho_i\left(A^{\dagger}\right)=\varrho_i(A)^{-1}.$$
+    \end{plemma}
+
+    \begin{pproof}
+        Let $A$ have singular value decomposition $USV^\top$. Then
+        \begin{align*}
+            A^{\dagger}&=\left(A^\top A\right)^{-1}A^\top\\&=\left(\left(USV^\top\right)^\top\left(USV^\top\right)\right)^{-1}\left(USV^\top\right)^\top\\&=\left(VS^\top U^\top USV^\top\right)^{-1}\left(USV^\top\right)^\top\\&=\left(VS^\top SV^\top\right)^{-1}VS^\top U^\top\\&=V\left(S^\top S\right)^{-1}S^\top U^\top,
+        \end{align*}
+        which is a singular value decomposition of $A^{\dagger}$. In particular, the singular values of $A^{\dagger}$ are given by the diagonal values of $\left(S^\top S\right)^{-1}S^\top$. Therefore, $$\varrho_i\left(A^{\dagger}\right)=\frac{1}{\varrho_i(A)^2}\varrho_i(A)=\varrho_i(A)^{-1}.$$
+    \end{pproof}
+
+    Note that $J_{G_{\theta}^{-1}}(\mathbf{y})=A^{\dagger}_{\omega}$. Due to the full rank assumptions, $$p_{G_{\theta}(\mathbf{z})}(\mathbf{y}\in\upsilon)=p_{\mathbf{z}}\left(\mathbf{z}\in G_{\theta}^{-1}(\upsilon)\right)=\int_{G^{-1}(\upsilon)}p_{\mathbf{z}}(\mathbf{z})\,\mathrm{d}\mathbf{z}.$$Therefore,
+    \begin{align*}
+        p_{G_{\theta}}(\mathbf{y}\in\upsilon)&=\sum_{\omega\in\Omega}\int_{\omega\cap\upsilon}p_{\mathbf{z}}\left(G_{\theta}^{-1}(\mathbf{y})\right)\sqrt{\det\left(J_{G_{\theta}^{-1}}(\mathbf{y})^\top J_{G_{\theta}^{-1}}(\mathbf{y})\right)}\,\mathrm{d}\mathbf{y}\\&=\sum_{\omega\in\Omega}\int_{\omega\cap\upsilon}p_{\mathbf{z}}\left(G_{\theta}^{-1}(\mathbf{y})\right)\sqrt{\det\left(\left(A_{\omega}\right)^\top A_{\omega}^{\dagger}\right)}\,\mathrm{d}\mathbf{y}\\&\overset{\text{Lem }\ref{lem:det_gram_matrix}}{=}\sum_{\omega\in\Omega}\int_{\omega\cap\upsilon}p_{\mathbf{z}}\left(G_{\theta}^{-1}(\mathbf{y})\right)\left(\prod_{i:\varrho_i\left(A_{\omega}^+\right)>0}\varrho_i\left(A_{\omega}^{\dagger}\right)\right)\,\mathrm{d}\mathbf{y}\\&\overset{\text{Lem }\ref{lem:singular_values_plus_matrix}}{=}\sum_{\omega\in\Omega}\int_{\omega\cap\upsilon}p_{\mathbf{z}}\left(G_{\theta}^{-1}(\mathbf{y})\right)\left(\prod_{i:\varrho_i\left(A_{\omega}\right)>0}\varrho_i\left(A_{\omega}^{\dagger}\right)\right)^{-1}\,\mathrm{d}\mathbf{y}\\&\overset{\text{Lem }\ref{lem:det_gram_matrix}}{=}\sum_{\omega\in\Omega}\int_{\omega\cap\upsilon}p_{\mathbf{z}}\left(G_{\theta}^{-1}(\mathbf{y})\right)\frac{1}{\sqrt{\det\left(A_{\omega}^\top A_{\omega}\right)}}\,\mathrm{d}\mathbf{y}\\&=\sum_{\omega\in\Omega}\int_{\omega\cap\upsilon}p_{\mathbf{z}}\left(\left(A_{\omega}^\top A_{\omega}\right)^{-1}A_{\omega}^\top\left(\mathbf{y}-b_{\omega}\right)\right)\frac{1}{\sqrt{\det\left(A_{\omega}^\top A_{\omega}\right)}}\,\mathrm{d}\mathbf{y}
+    \end{align*}
+    as required.
+\end{tproof}
+
+\begin{corollary}\label{cor:uniform_latents_generated_distribution}
+    In the setting of Theorem \ref{thm:density_generated_manifold}, when the density of the latent distribution is uniform on a bounded domain $\mathcal{D}$, $\mathbf{z}\sim U(\mathcal{D})$, we have $$p_{G_{\theta}}(\mathbf{y})\propto\sum_{\omega\in\Omega}\frac{1}{\sqrt{\det\left(A_{\omega}^\top A_{\omega}\right)}}\mathbf{1}_{\{\mathbf{y}\in\mathrm{aff}_{\omega\cap\mathcal{D}}\}}.$$
+\end{corollary}
+
+\begin{tproof}
+    Follows directly from Theorem \ref{thm:density_generated_manifold} and the fact that $$p_{\mathbf{z}}(\mathbf{z})=\frac{1}{\mu(\mathcal{D})}.$$
+\end{tproof}
+
+\section{Polarity Sampling}\label{sec:polarity_sampling}
+
+From Corollary \ref{cor:uniform_latents_generated_distribution} we can directly parametrise $p_{\mathbf{z}}$ to control the distribution of samples on the generated manifold.
+
+\begin{example}\label{eg:mode_samplings}
+    \begin{enumerate}
+        \item[]
+        \item With $\mathbf{z}\sim U(\bar{\omega})$, where $\bar{\omega}=\argmin_{\omega\in\Omega}\left(\det\left(A^\top_{\omega}A_{\omega}\right)\right)$, we sample from the mode of the deep generative models generated distribution.
+        \item With $\mathbf{z}\sim U(\bar{\omega})$, where $\bar{\omega}=\argmax_{\omega\in\Omega}\left(\det\left(A^\top_{\omega}A_{\omega}\right)\right)$, we sample from the anti-mode of the deep generative models generated distribution.
+    \end{enumerate}
+\end{example}
+
+\begin{corollary}\label{cor:polarity_sampling}
+    The latent distribution $$p_{\rho}(\mathbf{z})\propto\sum_{\omega\in\Omega}\det\left(A_{\omega}^\top A_{\omega}\right)^{\frac{\rho}{2}}\mathbf{1}_{\{\mathbf{z}\in\omega\}},$$on the domain $\mathcal{D}$, where $\rho$ is the so-called polarity parameter, ensures that the output distribution of the deep generative model is such that $$p_{G_{\theta}}(\mathbf{y})\propto\sum_{\omega\in\Omega}\det\left(A_{\omega}^\top A_{\omega}\right)^{\frac{\rho-1}{2}}\mathbf{1}_{\left\{\mathbf{y}\in\mathrm{aff}_{\omega\cap\mathcal{D}}\right\}}.$$
+\end{corollary}
+
+\begin{tproof}
+    Follows directly from Theorem \ref{thm:density_generated_manifold}.
+\end{tproof}
+
+\begin{remark}
+    In Corollary \ref{cor:polarity_sampling}, with $\rho=0$ in we sample from the standard deep generative network distribution, with $\rho\to-\infty$ we recover mode sampling from statement 1 of Example \ref{eg:mode_samplings}, and with $\rho\to\infty$ we recover anti-mode sampling from statement 2 of Example \ref{eg:mode_samplings}. 
+\end{remark}
+
+\subsection{Practical Implementation}
+
+From Corollary \ref{cor:polarity_sampling}, it is clear that we need to determine the regions $\omega$ in the domain $\mathcal{D}$, the corresponding $A_{\omega}$ and then $\det\left(A^\top_{\omega}A_{\omega}\right)$.
+
+\paragraph{Computing $A_{\omega}$.} Given a $\mathbf{z}\in\omega$, this can be done using \ref{eq:mapping_on_regions_using_gradients} as $A_{\omega}=J_{G_{\theta}}\left(G_{\theta}(\mathbf{z})\right)$.
+
+\paragraph{Discovering regions $\omega\in\Omega$.} For state-of-the-art deep generative network this is challenging due to the exponential nature of the regions. As an approximation one can form a large sample $n$ of latents $\mathbf{z}\sim U(\mathcal{D})$ and compute the corresponding $A_{\omega(\mathbf{z})}$ as above, in an attempt to account for all the regions.
+
+\paragraph{Computing $\det\left(A_{\omega}^\top A_{\omega}\right)$.} Due to a support lemma of Theorem \ref{thm:density_generated_manifold}, this computation reduces to computing the singular values of $A_{\omega}$, for which there are known computational algorithms that can be done in $O\left(\min\left(d,d^{(\ell)}\right)^3\right)$ operations. In practice, only the top-$k$ singular values are relevant, speeding up computations to $O\left(dk^2\right)$.
+
+\begin{algorithm}
+\caption{Polarity sampling.}\label{alg:polarity}
+\begin{algorithmic}
+\Require $d^{(\ell)}$, $d$, $n\gg d$, $G_{\theta}$, $\mathcal{D}$, $\rho$.
+\State $\mathcal{Z}\leftarrow[]$.
+\State $\mathcal{S}\leftarrow[]$.
+\State $\mathcal{R}\leftarrow[]$.
+\For{$i=1,\dots,n$}
+\State $\mathbf{z}\sim U(\mathcal{D})$.
+\State $\varrho=\text{SingularValues}\left(J_{\mathbf{z}}G_{\theta}(\mathbf{z})\right)$\Comment{Ordered in a decreasing manner.}
+\State Append $\mathbf{z}$ to $\mathcal{Z}$.
+\State Append $\rho\sum_{j=1}^{d^{(\ell)}}\log\left(\varrho_j+\epsilon\right)$
+\EndFor
+\For{$i=1,\dots,d$}
+\State $j\sim\text{Cat}(\mathrm{softmax}(\mathcal{S}))$.
+\State Append $\mathcal{Z}_j$ to $\mathcal{R}$
+\EndFor
+\State \Return $\mathcal{R}$.
+\end{algorithmic}
+\end{algorithm}
+
+\section{ScaLES}\label{sec:scales}
+
+\subsection{Latent Space Optimisation}
+
+Let $\mathcal{V}\subseteq\{0,1\}^{l\times c}$ be a discrete and structured space, where each instance of $\mathcal{V}$ can be thought of as a sequence of $l$ $c$-dimensional one-hot vectors representing categorical variables.
+
+Let $\mathcal{M}:\mathcal{V}\to\mathbb{R}$ be the objective function. Then latent space optimisation is the problem $$\argmax_{\mathbf{v}\in\mathcal{V}}\mathcal{M}(\mathbf{v}).$$In particular, a continuous representation of the problem is learned, and then optimisation techniques are applied in the continuous space before being decoded back to the discrete space.
+
+Let $E_{\theta}$ be a deep encoder model, let $G_{\theta}$ be a deep generative model, and let $\mathcal{D}=\left\{\mathbf{v}_i,y_i\right\}_{i=1}^n$ be an initial set of labelled data which is encoded into the latent space as $\mathcal{D}^{\mathbf{z}}=\left\{\mathbf{z}_i=E_{\theta}\left(\mathbf{v}_i\right),y_i\right\}_{i=1}^n$.
+
+Typically evaluations on $\mathcal{M}$ are expensive, thus a surrogate model $\hat{f}$ is utilised\footnote{Typically a Gaussian process.}. The acquisition function is then $$\mathcal{A}\left(\hat{f}(\mathbf{z})\right)=\mathbb{E}\left(\max\left(\hat{f}(\mathbf{z})-f^*,0\right)\right),$$where $f^*$ is the best observed objective value and the expectation is with respect to the posterior of $\hat{f}$.
+
+\begin{algorithm}
+\caption{Latent space optimisation.}\label{alg:lso}
+\begin{algorithmic}
+\Require $T$, $\mathcal{D}^{\mathbf{z}}$
+\For{$t=1,\dots,T$}
+\State Fit the surrogate model to $\mathcal{D}^{\mathbf{z}}$.
+\State Generate a batch of query points $\mathbf{z}^{(\text{new})}\argmax_{\mathbf{z}}=\mathcal{A}\left(\hat{f}(\mathbf{z})\right)$.
+\State Decode $\mathbf{v}^{\text{(new)}}=G_{\theta}\left(\mathbf{z}^{(\text{new})}\right)$.
+\State Obtain the true objective value $y^{(\text{new})}=\mathcal{M}\left(\mathbf{v}^{\text{(new)}}\right)$.
+\State Update $\mathcal{D}^\mathbf{z}$ with $\left(\mathbf{z}^{\text{(new)}},y^{\text{(new)}}\right)$.
+\EndFor
+\end{algorithmic}
+\end{algorithm}
+
+An issue with Algorithm \ref{alg:lso}, is that it ignores the structure of $\mathcal{V}$, a problem referred to as over-exploration.
+
+\begin{definition}\label{def:latent_space_valid_set}
+    Let $G_{\theta}:\mathcal{Z}\to\mathbb{R}^{l\times c}$ be a deep generative network, and let $\mathcal{V}\subseteq\mathbb{R}^{l\times c}$ be a set of valid sequences. The valid set of the latent space $\mathcal{Z}$ is $$\left\{\mathbf{z}:G_{\theta}(\mathbf{z})\in\mathcal{V}\right\}.$$
+\end{definition}
+
+\subsection{Scalable Latent Exploration Score}
+
+Deep generative networks $G_{\theta}$ for discrete sequences typically output a matrix of logits, which are then transformed into normalised scores using the softmax function, $$G_{\theta}(\mathbf{z})=\mathrm{softmax}\left(L_{\theta}(\mathbf{z})\right),$$applied to every row of $L_{\theta}(\mathbf{z})$. Henceforth, we extend our notation with $$\tilde{G}_{\theta}(\mathbf{z})=\mathrm{softmax}_+\left(L_{\theta}(\mathbf{z})\right):=\left(\tilde{\mathbf{p}}_{\mathbf{z}}^{(1)},\tilde{c}_{\mathbf{z}}^{(1)},\dots,\tilde{\mathbf{p}}_{\mathbf{z}}^{(l)},\tilde{c}_{\mathbf{z}}^{(l)}\right)^\top,$$where $$\begin{cases}\tilde{\mathbf{p}}_{\mathbf{z}}^{(i)}=\mathrm{softmax}\left(L_{\theta}(\mathbf{z})\right)_{i,\cdot}\\\tilde{c}_{\mathbf{z}}^{(i)}=\sum_{j=1}^c\exp\left(L_{\theta}(\mathbf{z})_{ij}\right).\end{cases}$$
+
+\begin{theorem}\label{thm:dgn_sequence_density}
+    Assume $L_{\theta}$ is bijective and expressible as the continuous piecewise affine function $$L_{\theta}(\mathbf{z})=\sum_{\omega\in\Omega}\left(A_{\omega}\mathbf{z}+b_{\omega}\right)\mathbf{1}_{\{\mathbf{z}\in\omega\}}.$$Moreover, suppose that $\mathbf{z}\sim p_{\mathbf{z}}$. Then $$p_{\tilde{G}_{\theta}}(\mathbf{v})=p_{\mathbf{z}}\left(\tilde{G}^{-1}_{\theta}(\mathbf{v})\right)\sqrt{\det\left(\sum_{i=1}^l\left(A_i^{\dagger}\right)^\top B_i^\top B_iA_i^{\dagger}\right)},$$where $$\begin{cases}B_i=\left(\mathrm{diag}\left(\frac{1}{\left(\tilde{\mathbf{p}}^{(i)}_{\mathbf{z}}\right)_1},\dots,\frac{1}{\left(\tilde{\mathbf{p}}^{(i)}_{\mathbf{z}}\right)_d}\right),\mathbf{1}\frac{1}{\tilde{c}_{\mathbf{z}}^{(i)}}\right)^\top\\A_i^{\dagger}=\left(A_{\omega}^{(1)},\dots,A_{\omega}^{(l)}\right)^{\dagger}_{(i\cdot d):((i+1)\cdot d)}.\end{cases}$$
+\end{theorem}
+
+\begin{tproof}
+
+    Consider the following.
+
+    \begin{plemma}\label{lem:jac_inverse_dgn}
+        In the setting of Theorem \ref{thm:dgn_sequence_density}, we have $$J\left(\tilde{G}_{\theta}^{-1}\right)(\mathbf{v})=\left(\begin{pmatrix}B_1&\dots&0\\\vdots&\ddots&\vdots\\0&\dots&B_l\end{pmatrix}A_{\omega}^{\dagger}\right)^\top.$$
+    \end{plemma}
+
+    \begin{pproof}
+        Recall that $\tilde{G}_{\theta}(\mathbf{z})=\mathrm{softmax}_+\left(L_{\theta}(\mathbf{z})\right)$. Since $L_{\theta}$ is bijective and hence invertible, we have $$\left(\tilde{G}_{\theta}\right)^{-1}(\mathbf{z})=L_{\theta}^{-1}\left(\mathrm{softmax}^{-1}_+(\mathbf{z})\right).$$ In particular, $$L_{\theta}^{-1}\left(\mathrm{softmax}_+^{-1}(\mathbf{v})\right)=\left(\mathrm{softmax}^{-1}_+(\mathbf{v})-b_{\omega}\right)A_{\omega}^\top.$$Moreover, observe that 
+        \begin{align*}
+            \mathrm{softmax}_+&\left(\begin{pmatrix}\log\left(\tilde{\mathbf{p}}_{\mathbf{z}}^{(1)}\right)+\log\left(\tilde{c}_{\mathbf{z}}^{(1)}\right)\\\vdots\\\log\left(\tilde{\mathbf{p}}_{\mathbf{z}}^{(l)}\right)+\log\left(\tilde{c}_{\mathbf{z}}^{(l)}\right)\end{pmatrix}\right)\\&=\begin{pmatrix}\frac{1}{\hat{c}_{\mathbf{z}}^{(1)}}e^{\left(\log\left(\left[\tilde{\mathbf{p}}_{\mathbf{z}}^{(1)}\right]_1\right)+\log\left(\tilde{c}_{\mathbf{z}}^{(1)}\right)\right)}&&&&\\&\hat{c}_{\mathbf{z}}^{(1)}&&&\\&&\ddots&&\\&&&\hat{c}_{\mathbf{z}}^{(l)}&\\&&&&e^{\left(\log\left(\left[\tilde{\mathbf{p}}_{\mathbf{z}}^{(l)}\right]_c\right)+\log\left(\tilde{c}_{\mathbf{z}}^{(l)}\right)\right)}\end{pmatrix}\\&=\left(\frac{\tilde{c}_{\mathbf{z}}^{(1)}}{\hat{c}_{\mathbf{z}}^{(1)}}\mathbf{\tilde{p}}_{\mathbf{z}}^{(1)},\hat{c}_{\mathbf{z}}^{(1)},\dots,\frac{\tilde{c}_{\mathbf{z}}^{(l)}}{\hat{c}_{\mathbf{z}}^{(l)}}\mathbf{\tilde{p}}_{\mathbf{z}}^{(l)},\hat{c}_{\mathbf{z}}^{(l)}\right)^\top\\&=\left(\tilde{\mathbf{p}}_{\mathbf{z}}^{(1)},\tilde{c}_{\mathbf{z}}^{(1)},\dots,\tilde{\mathbf{p}}_{\mathbf{z}}^{(l)},\tilde{c}_{\mathbf{z}}^{(l)}\right)^\top.
+        \end{align*}
+        where operations are component-wise operations and $$\hat{c}_{\mathbf{z}}^{(i)}=\sum_{j=1}^ce^{\left(\log\left(\left[\tilde{\mathbf{p}}_{\mathbf{z}}^{(i)}\right]_j\right)+\log\left(\tilde{c}_{\mathbf{z}}^{(i)}\right)\right)}=\tilde{c}_{\mathbf{z}}^{(i)}\sum_{j=1}^c\left[\tilde{\mathbf{p}}^{(i)}\right]_j=\tilde{c}_{\mathbf{z}}^{(i)}.$$So that, $$\mathrm{softmax}_+^{-1}(\mathbf{v})=\left(\log\left(\tilde{\mathbf{p}}_{\mathbf{z}}^{(1)}\right)+\log\left(\tilde{c}_{\mathbf{z}}^{(1)}\right),\dots,\log\left(\tilde{\mathbf{p}}_{\mathbf{z}}^{(l)}\right)+\log\left(\tilde{c}_{\mathbf{z}}^{(l)}\right)\right)^\top.$$Therefore, $$\frac{\partial}{\partial\mathbf{v}}\mathrm{softmax}^{-1}_+(\mathbf{v})=\begin{pmatrix}B_1&\dots&0\\\vdots&\ddots&\vdots\\0&\dots&B_l\end{pmatrix}$$where$$B_i=\left(\mathrm{diag}\left(\frac{1}{\left(\tilde{\mathbf{p}}^{(i)}_{\mathbf{z}}\right)_1},\dots,\frac{1}{\left(\tilde{\mathbf{p}}^{(i)}_{\mathbf{z}}\right)_d}\right),\mathbf{1}\frac{1}{\tilde{c}_{\mathbf{z}}^{(i)}}\right)^\top,$$thus the result follows.
+    \end{pproof}
+
+    Due to invertability, we can proceed as follows,
+    \begin{align*}
+        \mathbb{P}(\mathbf{v}\in\upsilon)&=\left(\mathbf{v}\in\tilde{G}_{\theta}^{-1}(\upsilon)\right)\\&=\sum_{\omega\in\Omega}\mathbb{P}\left(\mathbf{z}\in\left(\tilde{G}_{\theta}^{-1}(\upsilon)\cap\omega\right)\right)\\&=\sum_{\omega\in\Omega}\int_{\tilde{G}_{\theta}^{-1}(\upsilon)\cap\omega}p_{\mathbf{z}}(\mathbf{z})\,\mathrm{d}\mathbf{z}\\&=\sum_{\omega\in\Omega}\int_{\upsilon\cap\tilde{G}_{\theta}(\omega)}p_{\mathbf{z}}\left(\tilde{G}_{\theta}^{-1}(\mathbf{v})\right)\sqrt{\det\left(J\left(\tilde{G}^{-1}_{\theta}(\mathbf{v})\right)J\left(\tilde{G}_{\theta}^{-1}(\mathbf{v})\right)^\top\right)}\\&\overset{\text{Lem }\ref{lem:jac_inverse_dgn}}{=}\int_{\upsilon}\sum_{\omega\in\Omega}p_{\mathbf{z}}\left(\tilde{G}_{\theta}^{-1}(\mathbf{v})\right)\sqrt{\det\left(\sum_{i=1}^l\left(A^{\dagger}_i\right)^\top B_i^\top B_iA_i^{\dagger}\right)}.
+    \end{align*}
+    
+\end{tproof}
+
+\begin{definition}
+    The ScaLES with weight parameter $\rho$ is $$\mathcal{S}_{\rho}(\mathbf{z})=\log\left(p_{\mathbf{z}}(\mathbf{z})\right)+\rho\log\left(\sqrt{\det\left(\sum_{i=1}^l\left(A_i^{\dagger}\right)^\top B_i^\top B_iA_i^{\dagger}\right)}\right).$$
+\end{definition}
+
+ScaLES is theoretically and empirically verified to obtain higher scores in regions of the latent space's valid set, Definition \ref{def:latent_space_valid_set}. Therefore, it seems reasonable to utilise this score as a way to mitigate the over-exploration issue of Algorithm \ref{alg:lso}.
+
+Moreover, the ScaLES is differentiable, making it amenable to optimisation. More specifically, one modifies Algorithm \ref{alg:lso} with $$\mathbf{z}^{(\text{new})}=\mathrm{argmax}_{\mathbf{z}}\mathcal{A}\left(\hat{f}(\mathbf{z})\right)+\lambda\mathcal{S}(\mathbf{z}).$$
+
+\section{References}
+
+Section \ref{sec:cpa_autoencoders} from \citet{cosentinoDeepAutoencodersUnderstanding2022}. Section \ref{sec:cpa_vaes} from \citet{balestrieroAnalyticalProbabilityDistributions2020}, with some of Section \ref{sec:variational_bayes} from \citet{kingmaAutoEncodingVariationalBayes2022}. Section \ref{sec:density_generated_manifold} from \cite{humayunMaGNETUniformSampling2022}. Section \ref{sec:polarity_sampling} from \cite{humayunPolaritySamplingQuality2022}. Section \ref{sec:scales} from \citet{ronenScaLESScalableLatent2024}.
