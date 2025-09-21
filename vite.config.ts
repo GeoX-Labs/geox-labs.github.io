@@ -8,7 +8,7 @@ export default defineConfig(({ mode }) => {
 
   return {
     plugins: [react()],
-    base: '/geox-labs.github.io/', // 👈 MUST match your repo name
+    base: '/geox-labs.github.io/',
     define: {
       // only expose what you actually need
       'process.env.API_KEY': JSON.stringify(env.API_KEY)
