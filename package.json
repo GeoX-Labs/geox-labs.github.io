@@ -3,7 +3,7 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
-  "homepage": "https://geox-labs.github.io",
+  "homepage": "https://geox-labs.github.io/geox_labs_webpage",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
